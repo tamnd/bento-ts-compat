@@ -31,8 +31,8 @@ The recorded set is a ratchet: it may only shrink, a fresh miscompile that is no
 The suite checks a case at increasing depth.
 
 - **accept**: drive the case through `build.EmitGo` and classify it. A pass must not panic, and its emitted Go is compiled with `go build` to confirm it is well formed. Live today.
-- **emit golden**: the emitted Go for a pass is frozen under `goldens/` and checked byte for byte, so a lowering change is a reviewable diff before it lands. Live today. This is a no-drift claim, not a correctness one: a case can pass here with Go that computes the wrong answer as long as that Go is stable, and correctness is the runtime tier's job.
-- **runtime**: the emitted Go is compiled and run, and its output is checked against an oracle derived from the TypeScript compiler's own `.js` baseline for the case.
+- **emit golden**: the emitted Go for a pass is frozen under `suite/testdata/goldens/` and checked byte for byte, so a lowering change is a reviewable diff before it lands. Live today. This is a no-drift claim, not a correctness one: a case can pass here with Go that computes the wrong answer as long as that Go is stable, and correctness is the runtime tier's job.
+- **runtime**: the emitted Go is compiled and run, and its output is checked against an oracle frozen from the TypeScript compiler's own `.js` baseline for the case. Live today. This corpus is a type-checking suite, so most cases print nothing and the oracle mostly asserts a clean exit, which is what catches a lowering bug that compiles but panics at run time.
 - **diagnostics**: a case TypeScript rejects must not produce a running program. This tier is soundness only and grows with bento's typed checker.
 
 ## The corpus
@@ -58,8 +58,11 @@ Useful flags:
 - `-filter PATTERN` run only cases whose id matches the pattern, by substring or by path glob, the incremental seam when working on one lowering path
 - `-jobs N` how many cases to classify at once, default half the machine's CPUs
 - `-update-ledger` rewrite `status/ledger.txt` from the current classification, the one supported way to move the baseline
-- `-update-goldens` rewrite `goldens/` from the current emit, and on a full run prune a golden whose case no longer accepts, the one supported way to move a golden
-- `-run NAME` the standard Go test filter, to pick `TestStructure`, `TestAccept`, `TestLedger`, `TestEmitGolden`, or the format-layer unit tests
+- `-update-goldens` rewrite `suite/testdata/goldens/` from the current emit, and on a full run prune a golden whose case no longer accepts, the one supported way to move a golden
+- `-update-oracles` regenerate the runtime oracles from the `.js` baselines on Node, the one step that needs Node and the one supported way to move the oracle set
+- `-update-runtime` rewrite `status/runtime.txt` from the current runtime comparison, the one supported way to move the runtime-wrong ratchet
+- `-shard i/N` run only the i-th of N even slices of the selected cases, how the runtime tier's go-run pass is split across parallel CI jobs
+- `-run NAME` the standard Go test filter, to pick `TestStructure`, `TestAccept`, `TestLedger`, `TestEmitGolden`, `TestRuntime`, or the format-layer unit tests
 
 For example, to run the accept tier over just the enum conformance cases:
 
@@ -79,20 +82,37 @@ They are the burn-down list: each is a bento bug, and the count only goes down a
 
 ## The goldens
 
-`goldens/<id>.go` is the frozen Go bento emits for each accepted case, mirroring the corpus layout so a golden sits beside the case it comes from.
+`suite/testdata/goldens/<id>.go` is the frozen Go bento emits for each accepted case, mirroring the corpus layout so a golden sits beside the case it comes from.
 `TestEmitGolden` re-emits every accepted case and byte-checks it against its golden, so a lowering change that alters an emit is a diff a reviewer sees before it lands, the same review surface the bento benchmark goldens give.
+The tree lives under `testdata` so the go tool skips it when it expands `./...`: each golden is a standalone `package main` the runtime tier compiles in isolation, not a package of this module.
 The header names the corpus, not the bento build, so a golden does not churn when bento's version string moves.
 It is a determinism claim only: a golden can encode Go that computes the wrong answer, and the runtime tier is what catches that.
 The goldens tree is exactly the accepted set, so an accepted case with no golden and an orphan golden with no case both fail, and `-update-goldens` on a full run writes the one and prunes the other.
 
+## The oracles and the runtime tier
+
+`suite/testdata/oracles/<id>.txt` is the frozen expected result of running a case: its stdout and exit, in the same framed format bento's own conformance corpus uses.
+An oracle is generated offline from the case's vendored `.js` baseline, the TypeScript compiler's own emit, run on a pinned Node under two screens.
+A baseline whose output changes across three runs is non-deterministic, and one whose output changes under a perturbed timezone and locale is environment-sensitive, and both are dropped rather than frozen.
+A baseline that throws is also dropped, because on this corpus a throw is almost always a reference to an ambient declaration Node does not have, which the compiled Go, treating it as a real binding, does not reproduce, so the throw is an artifact of running the bare `.js` and not the case's meaning.
+What survives is a deterministic, self-contained, clean exit, and `-update-oracles` freezes it. That step is the only one that needs Node.
+
+`TestRuntime` compiles and runs each case's golden Go and checks its stdout and exit against the frozen oracle, so it needs no Node, only the Go toolchain.
+Number text is compared byte for byte, since bento's `value` package must print a number exactly as Node does, and only trailing newlines and CRLF are normalized away.
+A case whose Go runs but disagrees, wrong stdout or a wrong exit or a panic, is runtime-wrong, and `status/runtime.txt` is the ratchet of those known runtime bugs, the same shrink-only debt model the accept ledger uses.
+The go-run pass is heavy, so it is split with `-shard i/N`: a smoke shard runs on every push and the full set runs sharded on the weekly schedule.
+
 ## Layout
 
 - `suite/` the harness: corpus discovery, the case format layer, the emit classifier, and the tier tests
+- `suite/testdata/goldens/` the frozen emit for every accepted case, mirroring the corpus layout
+- `suite/testdata/oracles/` the frozen runtime oracles, one per case the runtime tier checks
 - `corpus/cases/` the vendored TypeScript cases, mirroring the upstream `compiler` and `conformance` roots
+- `corpus/baselines/` the vendored `.js` baselines for the accepted cases, the oracle generator's input
 - `corpus/PIN` the pinned corpus revisions
-- `goldens/` the frozen emit for every accepted case, mirroring the corpus layout
 - `status/ledger.txt` the classification baseline and known-wrong debt
-- `scripts/vendor.sh` refresh the corpus from a pinned commit
+- `status/runtime.txt` the runtime-wrong ratchet
+- `scripts/vendor.sh` refresh the corpus, `scripts/vendor-baselines.sh` refresh the baselines, both from a pinned commit
 
 ## License
 

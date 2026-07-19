@@ -70,3 +70,54 @@ jobs:
             -jobs 2 \
             -timeout 50m \
             -v
+
+  # T2 smoke: compile and run one shard of the cases that have a frozen oracle and
+  # check the output against it. This runs on every push and pull request as a fast
+  # runtime signal without paying for the whole go-run pass. It needs no Node: the
+  # oracles are frozen data, and only the Go toolchain runs here. A runtime-wrong
+  # case outside status/runtime.txt fails the shard.
+  runtime-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          check-latest: true
+          cache: true
+      - name: Runtime tier, smoke shard
+        run: |
+          go test ./suite/ \
+            -run TestRuntime \
+            -shard 0/8 \
+            -jobs 2 \
+            -timeout 40m \
+            -v
+
+  # T2 full: the whole runtime pass, split into eight shards run in parallel so no
+  # single job compiles and runs every case. It is heavy, a go run per case, so it
+  # runs on the weekly schedule and on demand rather than on every push. Each shard
+  # holds the same ratchet, so a fresh runtime-wrong fails whichever shard it lands
+  # in.
+  runtime-full:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          check-latest: true
+          cache: true
+      - name: Runtime tier, shard ${{ matrix.shard }} of 8
+        run: |
+          go test ./suite/ \
+            -run TestRuntime \
+            -shard ${{ matrix.shard }}/8 \
+            -jobs 2 \
+            -timeout 40m \
+            -v

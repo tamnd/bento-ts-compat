@@ -40,6 +40,12 @@ var jobs = flag.Int("jobs", defaultJobs(), "number of cases to classify at once"
 // coverage gain or a new handback lands as a reviewed diff, never a silent drift.
 var updateLedger = flag.Bool("update-ledger", false, "rewrite status/ledger.txt from the current classification")
 
+// updateGoldens, set by `go test -run TestEmitGolden -update-goldens`, rewrites the
+// emit goldens from the current lowering instead of checking against the committed
+// ones, and on a full run prunes a golden whose case no longer accepts. It is the
+// one supported way to move a golden, so an emit change lands as a reviewed diff.
+var updateGoldens = flag.Bool("update-goldens", false, "rewrite goldens/ from the current emit")
+
 // defaultJobs picks a worker count that keeps the machine responsive: half its
 // logical CPUs, at least one. The per-case work is memory heavy, so leaving cores
 // idle is the point, it caps how many checkers and builds live at once.
@@ -265,5 +271,97 @@ func TestLedger(t *testing.T) {
 		t.Errorf("classification ledger has drifted from status/ledger.txt\n"+
 			"run `go test ./suite -run TestLedger -update-ledger` after reviewing the change\n"+
 			"--- got ---\n%s", got)
+	}
+}
+
+// TestEmitGolden is T1, the emit-determinism tier: the Go bento emits for an
+// accepted case is exactly the committed golden. It is a no-silent-drift claim,
+// not a correctness one, so a lowering change that alters an emit surfaces as a
+// reviewable diff before it lands, and a case can pass here with Go that computes
+// the wrong answer as long as that Go is stable. Correctness is T2's job.
+//
+// Under -update-goldens it rewrites the goldens instead of checking, the one
+// supported way to move them, and on a full run it prunes a golden whose case no
+// longer accepts so the tree is exactly the accepted set. A filtered run touches
+// only its subset and never prunes, since it cannot see the whole accepted set. A
+// full check also fails on an accepted case with no golden and on an orphan golden
+// with no accepting case, so the committed tree and the accepted set stay in step.
+func TestEmitGolden(t *testing.T) {
+	var results map[string]Result
+	full := *filter == ""
+	if full {
+		results = fullCorpus(t)
+	} else {
+		results = classifyConcurrent(moduleRoot(t), selectCases(t), *jobs)
+	}
+
+	accepted := map[string]string{} // id -> emitted Go
+	for id, r := range results {
+		if r.Outcome == Pass {
+			accepted[id] = r.Go
+		}
+	}
+
+	if *updateGoldens {
+		for id, goSrc := range accepted {
+			if err := writeGolden(id, goSrc); err != nil {
+				t.Fatalf("write golden %s: %v", id, err)
+			}
+		}
+		if full {
+			pruneOrphanGoldens(t, accepted)
+		}
+		t.Logf("emit goldens: wrote %d accepted cases", len(accepted))
+		return
+	}
+
+	for id, goSrc := range accepted {
+		want, err := os.ReadFile(goldenPath(id))
+		if err != nil {
+			t.Errorf("accepted case %s has no golden (run -update-goldens): %v", id, err)
+			continue
+		}
+		if goSrc != string(want) {
+			t.Errorf("emitted Go for %s has drifted from its golden\n"+
+				"run `go test ./suite -run TestEmitGolden -update-goldens` after reviewing the change", id)
+		}
+	}
+	if full {
+		checkNoOrphanGoldens(t, accepted)
+	}
+}
+
+// pruneOrphanGoldens removes a golden whose case no longer accepts, so a coverage
+// change that turns a pass into a handback drops the stale golden under -update
+// rather than leaving it to rot. It runs only on a full update, the one run that
+// knows the whole accepted set.
+func pruneOrphanGoldens(t *testing.T, accepted map[string]string) {
+	t.Helper()
+	have, err := existingGoldens()
+	if err != nil {
+		t.Fatalf("scan goldens: %v", err)
+	}
+	for id := range have {
+		if _, ok := accepted[id]; !ok {
+			if err := os.Remove(goldenPath(id)); err != nil {
+				t.Fatalf("prune orphan golden %s: %v", id, err)
+			}
+		}
+	}
+}
+
+// checkNoOrphanGoldens fails on a committed golden with no accepting case, the
+// mirror of the missing-golden check, so the goldens tree can neither gain a stale
+// file nor miss a live one without the tier catching it.
+func checkNoOrphanGoldens(t *testing.T, accepted map[string]string) {
+	t.Helper()
+	have, err := existingGoldens()
+	if err != nil {
+		t.Fatalf("scan goldens: %v", err)
+	}
+	for id := range have {
+		if _, ok := accepted[id]; !ok {
+			t.Errorf("orphan golden %s has no accepting case (run -update-goldens to prune)", id)
+		}
 	}
 }

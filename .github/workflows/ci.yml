@@ -47,13 +47,16 @@ jobs:
       - name: Format-layer unit tests
         run: go test ./suite/ -run 'TestParse|TestDirectives|TestSplitFiles|TestIsMultiFile|TestOracle'
 
-  # T0 and T1 over the whole corpus: build-check every accepted emit, check the
-  # classification against the committed status/ledger.txt, and byte-check every
-  # accepted case against its golden. The three tests share one cached corpus
-  # classification, so the corpus is driven through the front end once. A handback
-  # that became a miscompile fails the ledger check, and an emit that drifted fails
-  # the golden check. The run bounds its fan-out with -jobs, because every case
-  # holds a checker and a build in memory and an unbounded run exhausts the runner.
+  # T0, T1, and T3 over the whole corpus: build-check every accepted emit, check
+  # the classification against the committed status/ledger.txt, byte-check every
+  # accepted case against its golden, and check that no error case bento runs is
+  # missing from status/diagnostics.txt. The tests share one cached corpus
+  # classification, so the corpus is driven through the front end once, and T3 adds
+  # only error-baseline reads on top. A handback that became a miscompile fails the
+  # ledger check, an emit that drifted fails the golden check, and a program
+  # TypeScript rejects that bento newly runs fails the diagnostics check. The run
+  # bounds its fan-out with -jobs, because every case holds a checker and a build
+  # in memory and an unbounded run exhausts the runner.
   classify:
     runs-on: ubuntu-latest
     steps:
@@ -63,10 +66,10 @@ jobs:
           go-version-file: go.mod
           check-latest: true
           cache: true
-      - name: Classify the corpus, check the ledger and the goldens
+      - name: Classify the corpus, check the ledger, goldens, and diagnostics
         run: |
           go test ./suite/ \
-            -run 'TestStructure|TestLedger|TestEmitGolden' \
+            -run 'TestStructure|TestLedger|TestEmitGolden|TestDiagnostics' \
             -jobs 2 \
             -timeout 50m \
             -v

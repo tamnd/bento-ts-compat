@@ -63,7 +63,7 @@ type Result struct {
 // exact bento build that produced it, so goldens do not churn when that build's
 // version string moves. The suite's own pin file records which bento the corpus
 // was frozen against.
-const stamp = "bento-ts-compat"
+const stamp = "ts-compat"
 
 // preEmitHandback screens a case for shapes the ahead-of-time path cannot take
 // as a single compilable unit before build.EmitGo is ever called, and returns

@@ -30,8 +30,8 @@ The recorded set is a ratchet: it may only shrink, a fresh miscompile that is no
 
 The suite checks a case at increasing depth.
 
-- **accept**: drive the case through `build.EmitGo` and classify it. A pass must not panic, and its emitted Go is compiled with `go build` to confirm it is well formed. This is the tier that is live today.
-- **emit golden**: the emitted Go for a pass is frozen as a golden and checked byte for byte, so a lowering change is a reviewable diff.
+- **accept**: drive the case through `build.EmitGo` and classify it. A pass must not panic, and its emitted Go is compiled with `go build` to confirm it is well formed. Live today.
+- **emit golden**: the emitted Go for a pass is frozen under `goldens/` and checked byte for byte, so a lowering change is a reviewable diff before it lands. Live today. This is a no-drift claim, not a correctness one: a case can pass here with Go that computes the wrong answer as long as that Go is stable, and correctness is the runtime tier's job.
 - **runtime**: the emitted Go is compiled and run, and its output is checked against an oracle derived from the TypeScript compiler's own `.js` baseline for the case.
 - **diagnostics**: a case TypeScript rejects must not produce a running program. This tier is soundness only and grows with bento's typed checker.
 
@@ -58,7 +58,8 @@ Useful flags:
 - `-filter PATTERN` run only cases whose id matches the pattern, by substring or by path glob, the incremental seam when working on one lowering path
 - `-jobs N` how many cases to classify at once, default half the machine's CPUs
 - `-update-ledger` rewrite `status/ledger.txt` from the current classification, the one supported way to move the baseline
-- `-run NAME` the standard Go test filter, to pick `TestStructure`, `TestAccept`, `TestLedger`, or the format-layer unit tests
+- `-update-goldens` rewrite `goldens/` from the current emit, and on a full run prune a golden whose case no longer accepts, the one supported way to move a golden
+- `-run NAME` the standard Go test filter, to pick `TestStructure`, `TestAccept`, `TestLedger`, `TestEmitGolden`, or the format-layer unit tests
 
 For example, to run the accept tier over just the enum conformance cases:
 
@@ -76,11 +77,21 @@ A coverage gain that turns a handback into a pass also changes the file, which i
 The `wrong` lines are the known-wrong debt, the cases where bento emits Go that does not compile today.
 They are the burn-down list: each is a bento bug, and the count only goes down as bento is fixed.
 
+## The goldens
+
+`goldens/<id>.go` is the frozen Go bento emits for each accepted case, mirroring the corpus layout so a golden sits beside the case it comes from.
+`TestEmitGolden` re-emits every accepted case and byte-checks it against its golden, so a lowering change that alters an emit is a diff a reviewer sees before it lands, the same review surface the bento benchmark goldens give.
+The header names the corpus, not the bento build, so a golden does not churn when bento's version string moves.
+It is a determinism claim only: a golden can encode Go that computes the wrong answer, and the runtime tier is what catches that.
+The goldens tree is exactly the accepted set, so an accepted case with no golden and an orphan golden with no case both fail, and `-update-goldens` on a full run writes the one and prunes the other.
+
 ## Layout
 
 - `suite/` the harness: corpus discovery, the case format layer, the emit classifier, and the tier tests
 - `corpus/cases/` the vendored TypeScript cases, mirroring the upstream `compiler` and `conformance` roots
 - `corpus/PIN` the pinned corpus revisions
+- `goldens/` the frozen emit for every accepted case, mirroring the corpus layout
+- `status/ledger.txt` the classification baseline and known-wrong debt
 - `scripts/vendor.sh` refresh the corpus from a pinned commit
 
 ## License

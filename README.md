@@ -33,7 +33,7 @@ The suite checks a case at increasing depth.
 - **accept**: drive the case through `build.EmitGo` and classify it. A pass must not panic, and its emitted Go is compiled with `go build` to confirm it is well formed. Live today.
 - **emit golden**: the emitted Go for a pass is frozen under `suite/testdata/goldens/` and checked byte for byte, so a lowering change is a reviewable diff before it lands. Live today. This is a no-drift claim, not a correctness one: a case can pass here with Go that computes the wrong answer as long as that Go is stable, and correctness is the runtime tier's job.
 - **runtime**: the emitted Go is compiled and run, and its output is checked against an oracle frozen from the TypeScript compiler's own `.js` baseline for the case. Live today. This corpus is a type-checking suite, so most cases print nothing and the oracle mostly asserts a clean exit, which is what catches a lowering bug that compiles but panics at run time.
-- **diagnostics**: a case TypeScript rejects must not produce a running program. This tier is soundness only and grows with bento's typed checker.
+- **diagnostics**: a case TypeScript rejects must not produce a running program. Live today. This tier is soundness only: bento passes by refusing the case, its checker reporting an error or its lowerer handing back, and it never has to report the same error code TypeScript did. Closing the cases where bento still runs a rejected program is gated on bento's typed checker, so the diagnostics-wrong set starts non-empty and the tier enforces from day one only that it never grows.
 
 ## The corpus
 
@@ -61,8 +61,9 @@ Useful flags:
 - `-update-goldens` rewrite `suite/testdata/goldens/` from the current emit, and on a full run prune a golden whose case no longer accepts, the one supported way to move a golden
 - `-update-oracles` regenerate the runtime oracles from the `.js` baselines on Node, the one step that needs Node and the one supported way to move the oracle set
 - `-update-runtime` rewrite `status/runtime.txt` from the current runtime comparison, the one supported way to move the runtime-wrong ratchet
+- `-update-diagnostics` rewrite `status/diagnostics.txt` from the current error-case classification, the one supported way to move the diagnostics-wrong ratchet
 - `-shard i/N` run only the i-th of N even slices of the selected cases, how the runtime tier's go-run pass is split across parallel CI jobs
-- `-run NAME` the standard Go test filter, to pick `TestStructure`, `TestAccept`, `TestLedger`, `TestEmitGolden`, `TestRuntime`, or the format-layer unit tests
+- `-run NAME` the standard Go test filter, to pick `TestStructure`, `TestAccept`, `TestLedger`, `TestEmitGolden`, `TestRuntime`, `TestDiagnostics`, or the format-layer unit tests
 
 For example, to run the accept tier over just the enum conformance cases:
 
@@ -102,16 +103,26 @@ Number text is compared byte for byte, since bento's `value` package must print 
 A case whose Go runs but disagrees, wrong stdout or a wrong exit or a panic, is runtime-wrong, and `status/runtime.txt` is the ratchet of those known runtime bugs, the same shrink-only debt model the accept ledger uses.
 The go-run pass is heavy, so it is split with `-shard i/N`: a smoke shard runs on every push and the full set runs sharded on the weekly schedule.
 
+## The diagnostics tier
+
+A case TypeScript rejects ships an `.errors.txt` baseline, the compiler's diagnostics for it, and the presence of that file is the signal that a case is an error case.
+`corpus/baselines/<id>.errors.txt` is vendored for every error case, not just the accepted ones, because the diagnostics tier's scope is the whole error-case set: a handback error case is a pass that still counts toward coverage.
+`TestDiagnostics` routes every error case out of the runtime tier and checks soundness: bento must refuse the program, its checker reporting an error or its lowerer handing back, and a case bento accepts and builds anyway is diagnostics-wrong, because it runs a program TypeScript refused to compile.
+The tier is soundness only, it never checks that bento reports the same `TS####` code, so it reads the code from the baseline for one purpose only, to record beside a case in the ratchet why TypeScript rejected it.
+`status/diagnostics.txt` is the ratchet of those known-unsound cases, the same shrink-only debt model the accept and runtime ratchets use, and it starts non-empty because closing it waits on the typed checker learning to reject these programs.
+An error case never reaches the runtime tier: bento must not run what TypeScript rejected, so the oracle generator withholds an oracle from an error case even when it also emits a `.js`, and the runtime tier drops any stale one it finds.
+
 ## Layout
 
 - `suite/` the harness: corpus discovery, the case format layer, the emit classifier, and the tier tests
 - `suite/testdata/goldens/` the frozen emit for every accepted case, mirroring the corpus layout
 - `suite/testdata/oracles/` the frozen runtime oracles, one per case the runtime tier checks
 - `corpus/cases/` the vendored TypeScript cases, mirroring the upstream `compiler` and `conformance` roots
-- `corpus/baselines/` the vendored `.js` baselines for the accepted cases, the oracle generator's input
+- `corpus/baselines/` the vendored baselines: `.js` for the accepted cases, the oracle generator's input, and `.errors.txt` for every error case, the diagnostics tier's routing signal
 - `corpus/PIN` the pinned corpus revisions
 - `status/ledger.txt` the classification baseline and known-wrong debt
 - `status/runtime.txt` the runtime-wrong ratchet
+- `status/diagnostics.txt` the diagnostics-wrong ratchet
 - `scripts/vendor.sh` refresh the corpus, `scripts/vendor-baselines.sh` refresh the baselines, both from a pinned commit
 
 ## License

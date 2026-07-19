@@ -3,6 +3,7 @@ package suite
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -57,4 +58,43 @@ func (b Baseline) HasErrors() bool { return fileExists(b.Errors) }
 func fileExists(path string) bool {
 	info, err := os.Stat(path)
 	return err == nil && !info.IsDir()
+}
+
+// errorCodeRe matches the code in an .errors.txt diagnostic header line. A header
+// takes one of two shapes: a positioned one,
+//
+//	tests/cases/compiler/foo.ts(2,5): error TS1235: message
+//
+// naming the file, position, code, and text, and a global one with no position,
+//
+//	error TS5069: Option 'emitDeclarationOnly' cannot be specified ...
+//
+// for a diagnostic about the compilation as a whole rather than a source span. The
+// optional `<path>: ` prefix matches the first and is absent for the second, while
+// the required `: ` before `error` in that prefix keeps the annotated-source
+// reproduction below the headers, which repeats each message under `!!! error`,
+// from matching, so a code is not double-counted.
+var errorCodeRe = regexp.MustCompile(`(?m)^(?:\S.*: )?error (TS\d+):`)
+
+// ErrorCodes reads the distinct TS#### diagnostic codes from an .errors.txt
+// baseline, in first-seen order. It reads only the diagnostic header lines and
+// ignores the annotated-source reproduction beneath them, the format doc's rule
+// that the suite reads codes and positions, never the reproduced source.
+//
+// This is a characterization aid, not a matcher. T3's claim is soundness, that
+// bento refuses a program TypeScript rejected, and it never checks that bento
+// reports the same codes. The codes are read only to record, beside a case in the
+// diagnostics ledger, why TypeScript rejected it, so a reader of the debt sees
+// the reason at a glance.
+func ErrorCodes(content string) []string {
+	seen := map[string]bool{}
+	var codes []string
+	for _, m := range errorCodeRe.FindAllStringSubmatch(content, -1) {
+		code := m[1]
+		if !seen[code] {
+			seen[code] = true
+			codes = append(codes, code)
+		}
+	}
+	return codes
 }

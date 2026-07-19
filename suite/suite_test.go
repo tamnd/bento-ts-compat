@@ -64,6 +64,13 @@ var updateOracles = flag.Bool("update-oracles", false, "regenerate oracles/ from
 // move that baseline, so a fixed miscompile leaves the ratchet as a reviewed diff.
 var updateRuntime = flag.Bool("update-runtime", false, "rewrite status/runtime.txt from the current runtime comparison")
 
+// updateDiagnostics, set by `go test -run TestDiagnostics -update-diagnostics`,
+// rewrites the diagnostics-wrong ratchet status/diagnostics.txt from the current
+// classification of the error cases instead of checking against the committed
+// one. It is the one supported way to move that baseline, so a case bento learns
+// to refuse leaves the ratchet as a reviewed diff.
+var updateDiagnostics = flag.Bool("update-diagnostics", false, "rewrite status/diagnostics.txt from the current error-case classification")
+
 // shard, set by `go test -shard i/N`, runs only the i-th of N even slices of the
 // selected cases, counting from zero. It is how the runtime tier's heavy go-run
 // pass is split across parallel CI jobs, each job taking one shard, so no single
@@ -428,16 +435,25 @@ func nodeBin(t *testing.T) string {
 	return bin
 }
 
-// oracleCandidates returns the accepted cases that have a vendored .js baseline,
-// the set the generator can try to turn into an oracle. A case with no baseline
-// has no ground truth to run against and is left to the tiers below.
+// oracleCandidates returns the accepted cases that have a vendored .js baseline
+// and are not error cases, the set the generator can try to turn into an oracle.
+// A case with no baseline has no ground truth to run against. An error case, one
+// with an .errors.txt baseline, is out of the runtime tier's scope by the
+// soundness rule: bento must not run a program TypeScript rejected, so it gets no
+// oracle and is routed to the diagnostics tier instead, even when it also emits a
+// .js. The .errors.txt presence dominates the .js presence, so the check comes
+// first.
 func oracleCandidates(results map[string]Result) []Case {
 	var out []Case
 	for id, r := range results {
 		if r.Outcome != Pass {
 			continue
 		}
-		if !ResolveBaseline(baselinesRoot, id).HasJS() {
+		b := ResolveBaseline(baselinesRoot, id)
+		if b.HasErrors() {
+			continue
+		}
+		if !b.HasJS() {
 			continue
 		}
 		out = append(out, Case{ID: id})
@@ -543,6 +559,15 @@ func TestRuntime(t *testing.T) {
 	}
 	ids := make([]string, 0, len(have))
 	for id := range have {
+		// An error case has no business in the runtime tier: bento must not run a
+		// program TypeScript rejected. The generator already withholds an oracle
+		// from an error case, so this only fires on a stale oracle left behind by a
+		// corpus refresh that turned a clean case into an error case, but it keeps
+		// the soundness rule enforced at the point the tier reads, not only at the
+		// point it writes.
+		if ResolveBaseline(baselinesRoot, id).HasErrors() {
+			continue
+		}
 		ids = append(ids, id)
 	}
 	sort.Strings(ids)
@@ -661,4 +686,110 @@ func readRuntimeLedger(t *testing.T) string {
 		t.Fatalf("read runtime ledger: %v", err)
 	}
 	return string(data)
+}
+
+// TestDiagnostics is T3, the diagnostics tier: over the error cases, the cases
+// TypeScript rejects, it proves soundness, that bento does not run a program
+// TypeScript refused to compile. An error case is one with a vendored .errors.txt
+// baseline, and the claim is deliberately weak: bento passes by refusing the
+// case, its checker reporting an error or its lowerer handing back, and never has
+// to report the same TS#### code TypeScript did. That code matching is the typed/
+// checker's conformance goal, not a soundness one.
+//
+// A diagnostics-wrong case is an error case bento accepts and builds, so it emits
+// a running program for something TypeScript rejected. Like the accept and
+// runtime tiers this is a ratchet the committed status/diagnostics.txt carries: a
+// fresh one not in it fails the run and names itself, while the known debt is
+// reported and burned down by making bento refuse the case. Closing that debt is
+// gated on the typed/ checker maturing, so the ratchet starts non-empty and the
+// invariant the tier enforces from day one is only that it never grows.
+//
+// It reuses the shared corpus classification, so it adds no build cost over the
+// accept and emit tiers it runs beside, only the error-baseline reads.
+func TestDiagnostics(t *testing.T) {
+	var results map[string]Result
+	full := *filter == ""
+	if full {
+		results = fullCorpus(t)
+	} else {
+		results = classifyConcurrent(moduleRoot(t), selectCases(t), *jobs)
+	}
+
+	wrong, errorCases, refused := diagnosticsScan(results)
+
+	if *updateDiagnostics {
+		if !full {
+			t.Fatal("diagnostics ratchet is only coherent over the whole corpus, run without -filter")
+		}
+		if err := os.WriteFile(diagnosticsLedgerPath, []byte(formatDiagnosticsLedger(wrong)), 0o644); err != nil {
+			t.Fatalf("write diagnostics ledger: %v", err)
+		}
+		t.Logf("diagnostics tier: refroze ratchet with %d wrong of %d error cases", len(wrong), errorCases)
+		return
+	}
+
+	ledger, err := readDiagnosticsLedger()
+	if err != nil {
+		t.Fatalf("read diagnostics ledger: %v", err)
+	}
+	known := parseDiagnosticsLedger(ledger)
+	fresh := 0
+	for _, w := range wrong {
+		id, code, _ := strings.Cut(w, "\t")
+		if !known[id] {
+			fresh++
+			t.Errorf("NEW DIAGNOSTICS WRONG %s: bento runs a program TypeScript rejects (%s)", id, code)
+		}
+	}
+	t.Logf("diagnostics tier: %d error cases, %d refused, %d unsound (%d known debt, %d fresh)",
+		errorCases, refused, len(wrong), len(wrong)-fresh, fresh)
+	if fresh > 0 {
+		t.Fatalf("%d error cases run as bento-compiled Go and are not in status/diagnostics.txt, this must be zero", fresh)
+	}
+}
+
+// diagnosticsScan splits the error cases out of a classification and reports the
+// diagnostics tier's tallies. An error case is one with an .errors.txt baseline.
+// It returns the unsound ones, each id tab-joined to the first diagnostic code so
+// the ratchet can record why TypeScript rejected it, along with the total error
+// case count and how many bento refused.
+//
+// A case bento accepts and builds (Pass) emits a running program, so it is
+// unsound. A handback is a clean refusal and a T3 pass. A case that classified
+// wrong at the accept tier, its emitted Go not compiling, is already tracked in
+// status/ledger.txt and does not run, so it is neither a fresh soundness
+// violation nor a clean refusal, and it is left to the accept ledger rather than
+// double-counted here.
+func diagnosticsScan(results map[string]Result) (wrong []string, errorCases, refused int) {
+	for id, r := range results {
+		if !ResolveBaseline(baselinesRoot, id).HasErrors() {
+			continue
+		}
+		errorCases++
+		switch r.Outcome {
+		case Pass:
+			wrong = append(wrong, id+"\t"+firstErrorCode(id))
+		case Handback:
+			refused++
+		}
+	}
+	sort.Strings(wrong)
+	return wrong, errorCases, refused
+}
+
+// firstErrorCode reads a case's .errors.txt baseline and returns its leading
+// diagnostic code, the reason TypeScript rejected the case, for the ratchet to
+// record. A baseline that cannot be read or carries no recognizable code yields
+// an empty string, so the tier degrades to recording the id alone rather than
+// failing on a malformed baseline.
+func firstErrorCode(id string) string {
+	data, err := os.ReadFile(ResolveBaseline(baselinesRoot, id).Errors)
+	if err != nil {
+		return ""
+	}
+	codes := ErrorCodes(string(data))
+	if len(codes) == 0 {
+		return ""
+	}
+	return codes[0]
 }

@@ -47,13 +47,14 @@ jobs:
       - name: Format-layer unit tests
         run: go test ./suite/ -run 'TestParse|TestDirectives|TestSplitFiles|TestIsMultiFile|TestOracle'
 
-  # The accept tier and the ledger regression gate: drive every corpus case
-  # through bento's ahead-of-time front end, build-check every accepted emit, and
-  # prove none is wrong. TestLedger also checks the classification against the
-  # committed status/ledger.txt, so a handback that became a miscompile fails
-  # here. The run bounds its fan-out with -jobs, because every case holds a
-  # checker and a build in memory and an unbounded run exhausts the runner.
-  ledger:
+  # T0 and T1 over the whole corpus: build-check every accepted emit, check the
+  # classification against the committed status/ledger.txt, and byte-check every
+  # accepted case against its golden. The three tests share one cached corpus
+  # classification, so the corpus is driven through the front end once. A handback
+  # that became a miscompile fails the ledger check, and an emit that drifted fails
+  # the golden check. The run bounds its fan-out with -jobs, because every case
+  # holds a checker and a build in memory and an unbounded run exhausts the runner.
+  classify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.0
@@ -62,10 +63,10 @@ jobs:
           go-version-file: go.mod
           check-latest: true
           cache: true
-      - name: Classify the corpus and check the ledger
+      - name: Classify the corpus, check the ledger and the goldens
         run: |
           go test ./suite/ \
-            -run 'TestStructure|TestLedger' \
+            -run 'TestStructure|TestLedger|TestEmitGolden' \
             -jobs 2 \
             -timeout 50m \
             -v

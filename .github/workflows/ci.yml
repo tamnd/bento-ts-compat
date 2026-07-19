@@ -1,0 +1,74 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Re-run weekly so a bento release that changes lowering surfaces on its own,
+    # even on a week with no compat commits.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Keep the harness itself healthy: formatting, vet, a clean build, the linter,
+  # and the format-layer unit tests that need no corpus.
+  harness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          check-latest: true
+          cache: true
+      - name: gofmt
+        run: |
+          unformatted=$(gofmt -s -l .)
+          if [ -n "$unformatted" ]; then
+            echo "These files need gofmt -s -w:"
+            echo "$unformatted"
+            exit 1
+          fi
+      - name: go vet
+        run: go vet ./...
+      - name: build
+        run: go build ./...
+      - uses: golangci/golangci-lint-action@v9.2.1
+        with:
+          version: latest
+      - name: Format-layer unit tests
+        run: go test ./suite/ -run 'TestParse|TestDirectives|TestSplitFiles|TestIsMultiFile|TestOracle'
+
+  # The accept tier: drive every corpus case through bento's ahead-of-time front
+  # end and prove none is wrong. It is sharded by corpus root so each job stays
+  # under an hour, and each shard bounds its front-end fan-out with -jobs, because
+  # every case holds a checker in memory and an unbounded run exhausts the runner.
+  accept:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [compiler, conformance]
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          check-latest: true
+          cache: true
+      - name: Accept over ${{ matrix.shard }}
+        run: |
+          go test ./suite/ \
+            -run 'TestStructure|TestAccept' \
+            -run-filter '${{ matrix.shard }}/' \
+            -jobs 2 \
+            -timeout 50m \
+            -v

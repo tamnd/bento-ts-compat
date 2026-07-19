@@ -33,8 +33,11 @@ func buildCheck(moduleRoot, goSrc string) (buildErr string, setupErr error) {
 	// Discard the linked object: T0 only needs to know the package compiles, and
 	// writing every accepted case's binary to disk would be gigabytes of dead
 	// output. The build still populates the shared package cache, which TestMain
-	// bounds, so repeated runs stay fast.
-	cmd := exec.Command("go", "build", "-o", os.DevNull, ".")
+	// bounds, so repeated runs stay fast. -buildvcs=false because the scratch dir
+	// sits inside this git repo, and the default VCS stamping would shell out to
+	// git for every one of a thousand builds, contending for the repo's index lock
+	// and adding nothing T0 cares about.
+	cmd := exec.Command("go", "build", "-buildvcs=false", "-o", os.DevNull, ".")
 	cmd.Dir = dir
 	var out bytes.Buffer
 	cmd.Stdout = &out

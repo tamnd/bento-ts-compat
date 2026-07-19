@@ -1,0 +1,6 @@
+# The corpus is vendored third-party material. Keep it byte-for-byte as copied
+# from upstream: no line-ending conversion, and keep it out of language stats
+# and diffs so it does not drown the harness code.
+corpus/** -text linguist-vendored
+oracles/** -text linguist-generated
+goldens/** -text linguist-generated

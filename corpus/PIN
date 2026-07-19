@@ -10,10 +10,13 @@ frontend  github.com/tamnd/typescript v0.0.0-20260716030941-7e0a8605ba83
 # _submodules/TypeScript submodule.
 cases     microsoft/TypeScript 4d4f005c8541e0255a9d8791205fdce326e462bc
 
-# Baselines: the TypeScript compiler's own .js emit, from the same port revision,
-# under testdata/baselines/reference/submodule. Only the accepted cases' baselines
-# are vendored, the subset the runtime tier turns into oracles, kept in sync by
-# scripts/vendor-baselines.sh. See 05 for why this narrows doc 01's wholesale copy.
+# Baselines: the TypeScript compiler's own baselines, from the same port revision,
+# under testdata/baselines/reference/submodule. Two flavors are vendored, kept in
+# sync by scripts/vendor-baselines.sh. The .js emit, the subset the runtime tier
+# turns into oracles, is vendored for the accepted cases only (see 05 for why this
+# narrows doc 01's wholesale copy). The .errors.txt diagnostics are vendored for
+# every error case, accepted or not, because the diagnostics tier's scope is the
+# whole error-case set.
 baselines github.com/tamnd/typescript 7e0a8605ba83 testdata/baselines/reference/submodule
 
 version   6.0.0-dev (tsgo-port)

@@ -17,15 +17,20 @@ Every case resolves one of three ways.
 - **handback**: bento declined the case with a named reason and emitted nothing. This is the expected outcome for the large part of the corpus that leans on checker features or module shapes the ahead-of-time path does not lower yet. A handback is a clean decline, not a failure.
 - **wrong**: bento produced Go that must not exist. It panicked while lowering, or it emitted Go that does not compile, or that runs to the wrong answer.
 
-The whole suite exists to keep the wrong count at zero.
 A handback is fine and expected, and the pass count climbs as bento's lowering grows.
-Wrong is a hard zero on every run, because the contract is that bento says no and emits nothing before it ever says yes and emits something incorrect.
+The suite exists to drive the wrong count to zero and hold it there.
+The contract is that bento says no and emits nothing before it ever says yes and emits something incorrect, so every wrong case is a bento bug to fix.
+
+The wrong count is not yet zero.
+Turning on the build-check surfaced a batch of cases where bento emits Go that does not compile, each a real lowering bug.
+Those cases are recorded in the ledger as known wrong, so the suite stays green and every case is measured while the bugs are burned down in bento.
+The recorded set is a ratchet: it may only shrink, a fresh miscompile that is not already in the ledger fails the run, and the end state is an empty wrong set reached by fixing bento to emit correct Go, never by making it hand back.
 
 ## The tiers
 
 The suite checks a case at increasing depth.
 
-- **accept**: drive the case through `build.EmitGo` and classify it. A pass must not panic, and its emitted Go must build. This is the tier that is live today.
+- **accept**: drive the case through `build.EmitGo` and classify it. A pass must not panic, and its emitted Go is compiled with `go build` to confirm it is well formed. This is the tier that is live today.
 - **emit golden**: the emitted Go for a pass is frozen as a golden and checked byte for byte, so a lowering change is a reviewable diff.
 - **runtime**: the emitted Go is compiled and run, and its output is checked against an oracle derived from the TypeScript compiler's own `.js` baseline for the case.
 - **diagnostics**: a case TypeScript rejects must not produce a running program. This tier is soundness only and grows with bento's typed checker.
@@ -50,15 +55,26 @@ The accept tier drives every case through a checker, which is memory heavy, so t
 
 Useful flags:
 
-- `-run-filter SUBSTRING` run only cases whose id contains the substring, the incremental seam when working on one lowering path
-- `-jobs N` how many cases to drive through the front end at once, default half the machine's CPUs
-- `-run NAME` the standard Go test filter, to pick `TestStructure`, `TestAccept`, or the format-layer unit tests
+- `-filter PATTERN` run only cases whose id matches the pattern, by substring or by path glob, the incremental seam when working on one lowering path
+- `-jobs N` how many cases to classify at once, default half the machine's CPUs
+- `-update-ledger` rewrite `status/ledger.txt` from the current classification, the one supported way to move the baseline
+- `-run NAME` the standard Go test filter, to pick `TestStructure`, `TestAccept`, `TestLedger`, or the format-layer unit tests
 
 For example, to run the accept tier over just the enum conformance cases:
 
 ```
-go test ./suite/ -run TestAccept -run-filter conformance/enums/ -v
+go test ./suite/ -run TestAccept -filter conformance/enums/ -v
 ```
+
+## The ledger
+
+`status/ledger.txt` records every non-passing case, one `<status> <case id>` line, sorted by id.
+A pass is not listed, so the ledger is the complement of the pass set: it shrinks as bento's lowering grows, and its length is the non-passing count at a glance.
+It is generated, never hand-edited.
+`TestLedger` regenerates the classification over the whole corpus and checks it against the committed file, so a case that was a clean handback and is now wrong changes its line and fails the run.
+A coverage gain that turns a handback into a pass also changes the file, which is the point: it is a reviewable diff, and a developer refreezes the shrunk ledger with `-update-ledger`.
+The `wrong` lines are the known-wrong debt, the cases where bento emits Go that does not compile today.
+They are the burn-down list: each is a bento bug, and the count only goes down as bento is fixed.
 
 ## Layout
 

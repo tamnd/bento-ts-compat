@@ -2,3 +2,7 @@ bin/
 .cache/
 scratch/
 *.out
+
+# The accept tier's build-check writes each accepted case to a scratch dir under
+# the module tree and removes it, but a crashed run can leave one behind.
+suite/buildcheck-*/

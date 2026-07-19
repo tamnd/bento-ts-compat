@@ -47,16 +47,14 @@ jobs:
       - name: Format-layer unit tests
         run: go test ./suite/ -run 'TestParse|TestDirectives|TestSplitFiles|TestIsMultiFile|TestOracle'
 
-  # The accept tier: drive every corpus case through bento's ahead-of-time front
-  # end and prove none is wrong. It is sharded by corpus root so each job stays
-  # under an hour, and each shard bounds its front-end fan-out with -jobs, because
-  # every case holds a checker in memory and an unbounded run exhausts the runner.
-  accept:
+  # The accept tier and the ledger regression gate: drive every corpus case
+  # through bento's ahead-of-time front end, build-check every accepted emit, and
+  # prove none is wrong. TestLedger also checks the classification against the
+  # committed status/ledger.txt, so a handback that became a miscompile fails
+  # here. The run bounds its fan-out with -jobs, because every case holds a
+  # checker and a build in memory and an unbounded run exhausts the runner.
+  ledger:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [compiler, conformance]
     steps:
       - uses: actions/checkout@v7.0.0
       - uses: actions/setup-go@v6
@@ -64,11 +62,10 @@ jobs:
           go-version-file: go.mod
           check-latest: true
           cache: true
-      - name: Accept over ${{ matrix.shard }}
+      - name: Classify the corpus and check the ledger
         run: |
           go test ./suite/ \
-            -run 'TestStructure|TestAccept' \
-            -run-filter '${{ matrix.shard }}/' \
+            -run 'TestStructure|TestLedger' \
             -jobs 2 \
             -timeout 50m \
             -v

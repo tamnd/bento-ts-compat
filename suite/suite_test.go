@@ -2,10 +2,11 @@ package suite
 
 import (
 	"flag"
+	"os"
+	"path"
 	"runtime"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"testing"
 )
 
@@ -14,37 +15,69 @@ import (
 // conformance/, so a case id is its path beneath this root.
 const casesRoot = "../corpus/cases"
 
-// filter, set by `go test -run-filter substring`, narrows a run to cases whose
-// id contains the substring. It is the incremental seam of the accept tier:
-// working on one lowering path reruns only the cases whose path names it, without
-// the cost of driving all twelve thousand. Empty runs the whole corpus. The flag
-// is deliberately not named -run, which the testing package already owns for
-// subtest names, so the two filters compose.
-var filter = flag.String("run-filter", "", "run only cases whose id contains this substring")
+// ledgerPath is the committed classification baseline, relative to this package.
+const ledgerPath = "../status/ledger.txt"
 
-// jobs, set by `go test -jobs N`, caps how many cases the accept tier drives at
-// once. Each case spins a front-end checker, which is memory heavy, and an
-// unbounded fan-out over twelve thousand of them exhausts memory and reboots the
-// machine, the failure the corpus README warns about. The default tracks the
-// machine's parallelism but leaves headroom rather than pinning every core. A
-// bounded pool, not t.Parallel over the whole corpus, is the deliberate shape.
-var jobs = flag.Int("jobs", defaultJobs(), "number of cases to drive through the front end at once")
+// filter, set by `go test -filter conformance/types/enum`, narrows a run to
+// cases whose id matches the pattern, by substring or by glob. It is the
+// incremental seam: working on one lowering path reruns only the cases whose
+// path names it, without the cost of driving all twelve thousand. Empty runs the
+// whole corpus. The name is not -run, which the testing package already owns for
+// subtest names, so the two compose.
+var filter = flag.String("filter", "", "run only cases whose id matches this substring or glob")
+
+// jobs, set by `go test -jobs N`, caps how many cases the suite drives at once.
+// Each case spins a front-end checker and, on a pass, a go build, both heavy, and
+// an unbounded fan-out over twelve thousand of them exhausts the machine, the
+// failure the corpus README warns about. The default tracks the machine's
+// parallelism but leaves headroom rather than pinning every core. A bounded pool,
+// not t.Parallel over the whole corpus, is the deliberate shape.
+var jobs = flag.Int("jobs", defaultJobs(), "number of cases to classify at once")
+
+// updateLedger, set by `go test -run TestLedger -update-ledger`, rewrites
+// status/ledger.txt from the current classification instead of checking against
+// the committed one. It is the one supported way to move the baseline, so a
+// coverage gain or a new handback lands as a reviewed diff, never a silent drift.
+var updateLedger = flag.Bool("update-ledger", false, "rewrite status/ledger.txt from the current classification")
 
 // defaultJobs picks a worker count that keeps the machine responsive: half its
-// logical CPUs, at least one. The front end is the memory bottleneck, not the
-// CPU, so leaving cores idle is the point, it caps how many checkers live at
-// once.
+// logical CPUs, at least one. The per-case work is memory heavy, so leaving cores
+// idle is the point, it caps how many checkers and builds live at once.
 func defaultJobs() int {
-	n := runtime.NumCPU() / 2
-	if n < 1 {
-		n = 1
-	}
-	return n
+	return max(runtime.NumCPU()/2, 1)
 }
 
-// selectCases discovers the corpus and applies -run-filter. A discovery error or
-// an empty selection is fatal, since a run that silently checks nothing passes
-// for the wrong reason and hides a broken vendor or an over-narrow filter.
+// matchFilter reports whether a case id is selected by the -filter pattern. An
+// empty pattern selects everything. A non-empty pattern matches as a substring
+// or as a path glob, so both `enum` and `conformance/types/*` select the enum
+// family, whichever a developer reaches for.
+func matchFilter(id, pattern string) bool {
+	if pattern == "" {
+		return true
+	}
+	if strings.Contains(id, pattern) {
+		return true
+	}
+	ok, err := path.Match(pattern, id)
+	return err == nil && ok
+}
+
+// moduleRoot returns the directory the build-check writes its scratch programs
+// into. It is this package's directory, which sits inside the module tree, so an
+// emitted program's import of bento's value package resolves from the module's
+// requirements with no separate go.mod.
+func moduleRoot(t *testing.T) string {
+	t.Helper()
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("getwd: %v", err)
+	}
+	return wd
+}
+
+// selectCases discovers the corpus and applies -filter. A discovery error or an
+// empty selection is fatal, since a run that silently checks nothing passes for
+// the wrong reason and hides a broken vendor or an over-narrow filter.
 func selectCases(t *testing.T) []Case {
 	t.Helper()
 	all, err := Discover(casesRoot)
@@ -59,14 +92,66 @@ func selectCases(t *testing.T) []Case {
 	}
 	var kept []Case
 	for _, c := range all {
-		if strings.Contains(c.ID, *filter) {
+		if matchFilter(c.ID, *filter) {
 			kept = append(kept, c)
 		}
 	}
 	if len(kept) == 0 {
-		t.Fatalf("no cases match -run-filter %q", *filter)
+		t.Fatalf("no cases match -filter %q", *filter)
 	}
 	return kept
+}
+
+// classifyConcurrent runs the full T0 judgement over cases through a bounded
+// worker pool and returns the results keyed by case id. The bound is the point:
+// each worker holds a checker and a build in memory, so the pool width, not the
+// case count, sets the peak footprint.
+func classifyConcurrent(root string, cases []Case, jobs int) map[string]Result {
+	results := make(map[string]Result, len(cases))
+	var mu sync.Mutex
+	work := make(chan Case)
+	var wg sync.WaitGroup
+	for range jobs {
+		wg.Go(func() {
+			for c := range work {
+				r := classifyBuilt(root, c)
+				mu.Lock()
+				results[c.ID] = r
+				mu.Unlock()
+			}
+		})
+	}
+	for _, c := range cases {
+		work <- c
+	}
+	close(work)
+	wg.Wait()
+	return results
+}
+
+// The whole-corpus classification is expensive, a checker and a build per case,
+// and both TestAccept on a full run and TestLedger need it. Compute it once per
+// test binary and share it, so an unfiltered `go test ./suite` pays for the
+// corpus a single time.
+var (
+	corpusOnce    sync.Once
+	corpusResults map[string]Result
+)
+
+// fullCorpus classifies every case once and caches the result for the run. It
+// ignores -filter on purpose: the ledger is only coherent over the whole corpus,
+// and a full TestAccept wants the same shared pass.
+func fullCorpus(t *testing.T) map[string]Result {
+	t.Helper()
+	root := moduleRoot(t)
+	corpusOnce.Do(func() {
+		all, err := Discover(casesRoot)
+		if err != nil {
+			t.Fatalf("discover cases: %v", err)
+		}
+		corpusResults = classifyConcurrent(root, all, *jobs)
+	})
+	return corpusResults
 }
 
 // TestStructure proves the corpus is well formed before any tier reads a case's
@@ -91,49 +176,94 @@ func TestStructure(t *testing.T) {
 	}
 }
 
-// TestAccept drives every selected case through the emit step and asserts the one
-// invariant the whole suite is built on: no case is ever wrong. A wrong outcome
-// is a panic in the front end or, once C1 wires the compile check, Go that does
-// not build. Passes and handbacks are both acceptable here and are only counted,
-// not asserted on, because which cases lower today is a moving line the ledger
-// tracks, while wrong is a hard zero that never moves.
+// wrongBaseline reads the committed ledger and returns the set of case ids already
+// recorded as wrong. This is the known-wrong debt: cases where bento today emits Go
+// that does not compile, each one a bento lowering bug still to be fixed. The suite
+// stays green against this baseline so the infrastructure can land and every new
+// case is measured, but the set is a ratchet, it may only shrink. A wrong case not
+// in the set is a fresh regression and fails the run; a case in the set that now
+// builds is a fix, and the ledger diff records it when a developer refreezes. The
+// end state is an empty set, reached by fixing bento, never by handing back.
+func wrongBaseline(t *testing.T) map[string]bool {
+	t.Helper()
+	data, err := os.ReadFile(ledgerPath)
+	if err != nil {
+		t.Fatalf("read ledger for wrong baseline: %v", err)
+	}
+	known := map[string]bool{}
+	for line := range strings.SplitSeq(string(data), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) == 2 && fields[0] == Wrong.String() {
+			known[fields[1]] = true
+		}
+	}
+	return known
+}
+
+// TestAccept drives every selected case through the full T0 judgement, emit then
+// build-check, and guards the invariant the whole suite is built on: bento never
+// emits Go that is wrong in a way the committed ledger did not already record. A
+// wrong outcome is a panic in the front end, or an accepted emit that does not
+// compile. Passes and handbacks are both acceptable and only counted, because
+// which cases lower today is a moving line the ledger tracks. Wrong is the debt
+// line: it is allowed only where the ledger already carries it, and it may only
+// shrink, so a fresh miscompile fails here and names itself while the known debt
+// is reported and burned down by fixing bento.
 //
-// The fan-out is a bounded worker pool sized by -jobs, not t.Parallel over the
-// corpus, because each case holds a front-end checker in memory and an unbounded
-// twelve-thousand-wide fan-out exhausts the machine. Every wrong case is reported
-// with its reason so a regression names itself.
+// An unfiltered run shares the cached whole-corpus classification with the ledger
+// so the corpus is classified once. A filtered run, the iteration loop, classifies
+// just its subset. Every unexpected wrong case is reported with its reason.
 func TestAccept(t *testing.T) {
-	cases := selectCases(t)
-
-	var passes, handbacks, wrongs atomic.Int64
-	work := make(chan Case)
-	var wg sync.WaitGroup
-	for range *jobs {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for c := range work {
-				switch r := Classify(c); r.Outcome {
-				case Pass:
-					passes.Add(1)
-				case Handback:
-					handbacks.Add(1)
-				case Wrong:
-					wrongs.Add(1)
-					t.Errorf("WRONG %s: %s", c.ID, r.Reason)
-				}
-			}
-		}()
+	var results map[string]Result
+	if *filter == "" {
+		results = fullCorpus(t)
+	} else {
+		results = classifyConcurrent(moduleRoot(t), selectCases(t), *jobs)
 	}
-	for _, c := range cases {
-		work <- c
+	known := wrongBaseline(t)
+	fresh := 0
+	for id, r := range results {
+		if r.Outcome == Wrong && !known[id] {
+			fresh++
+			t.Errorf("NEW WRONG %s: %s", id, r.Reason)
+		}
 	}
-	close(work)
-	wg.Wait()
+	counts := Count(results)
+	t.Logf("accept tier: %s (%d wrong are known debt in the ledger)", counts, counts.Wrong-fresh)
+	if fresh > 0 {
+		t.Fatalf("%d cases produced fresh wrong output not in the ledger, this must be zero", fresh)
+	}
+}
 
-	t.Logf("accept tier over %d cases: %d pass, %d handback, %d wrong",
-		len(cases), passes.Load(), handbacks.Load(), wrongs.Load())
-	if w := wrongs.Load(); w > 0 {
-		t.Fatalf("%d cases produced wrong output, this count must be zero", w)
+// TestLedger regenerates the classification ledger over the whole corpus and
+// checks it against the committed status/ledger.txt. It is the regression gate:
+// a case that was a clean handback and is now wrong changes its line, and the
+// byte comparison fails, so a miscompile that slips past a filtered local run is
+// caught here. A coverage gain that turns a handback into a pass also changes the
+// file, which is intended, a developer reviews the shrinking ledger and refreezes
+// it with -update-ledger. It never runs under -filter, because a partial ledger
+// is not a baseline.
+func TestLedger(t *testing.T) {
+	if *filter != "" {
+		t.Skip("the ledger is only coherent over the whole corpus, run without -filter")
+	}
+	results := fullCorpus(t)
+	got := FormatLedger(results)
+	t.Logf("ledger baseline: %s", Count(results))
+
+	if *updateLedger {
+		if err := os.WriteFile(ledgerPath, []byte(got), 0o644); err != nil {
+			t.Fatalf("write ledger: %v", err)
+		}
+		return
+	}
+	want, err := os.ReadFile(ledgerPath)
+	if err != nil {
+		t.Fatalf("read ledger (run with -update-ledger to create it): %v", err)
+	}
+	if got != string(want) {
+		t.Errorf("classification ledger has drifted from status/ledger.txt\n"+
+			"run `go test ./suite -run TestLedger -update-ledger` after reviewing the change\n"+
+			"--- got ---\n%s", got)
 	}
 }

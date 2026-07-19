@@ -6,10 +6,13 @@ import (
 	"strings"
 )
 
-// goldensRoot is where the frozen emit goldens live relative to this package. The
-// tree under it mirrors the corpus layout, so a golden sits at the case's own path
-// with a .go suffix and a reviewer reads the two side by side.
-const goldensRoot = "../goldens"
+// goldensRoot is where the frozen emit goldens live relative to this package. It
+// sits under testdata so the go tool skips this tree when it expands ./..., since
+// each golden is a standalone package main compiled in isolation by the runtime
+// tier, not a package of this module. The tree under it mirrors the corpus
+// layout, so a golden sits at the case's own path with a .go suffix and a
+// reviewer reads the two side by side.
+const goldensRoot = "testdata/goldens"
 
 // goldenPath returns the golden file for a case id. The id keeps its source
 // extension, so foo.ts and foo.tsx never collide, and .go is appended so the file

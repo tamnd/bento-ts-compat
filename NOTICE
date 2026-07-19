@@ -1,0 +1,25 @@
+bento-ts-compat
+Copyright (c) 2026 Duc-Tam Nguyen
+
+The harness code in this repository (everything outside corpus/) is licensed
+under the MIT License, see LICENSE.
+
+The test corpus under corpus/ is third-party material, vendored unmodified and
+distributed under its own license, not the MIT License above.
+
+  corpus/cases/
+    TypeScript test cases from microsoft/TypeScript.
+    Copyright (c) Microsoft Corporation.
+    Licensed under the Apache License, Version 2.0.
+    https://github.com/microsoft/TypeScript
+
+  corpus/baselines/
+    Reference JavaScript emit produced by microsoft/typescript-go, the Go port
+    of the TypeScript compiler, from the same revision the cases are pinned to.
+    Copyright (c) Microsoft Corporation.
+    Licensed under the Apache License, Version 2.0.
+    https://github.com/microsoft/typescript-go
+
+The exact upstream commits the corpus is copied from are recorded in
+corpus/PIN. A full copy of the Apache License, Version 2.0 is available at
+https://www.apache.org/licenses/LICENSE-2.0.

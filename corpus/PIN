@@ -1,0 +1,18 @@
+# bento-ts-compat corpus pin
+#
+# The corpus is derived from bento's front-end pin, so the checker that accepts
+# or rejects a case is the exact one bento ships. See 01_corpus_and_vendoring.md.
+
+# bento's front-end: the additive fork of microsoft/typescript-go bento pins.
+frontend  github.com/tamnd/typescript v0.0.0-20260716030941-7e0a8605ba83
+
+# Cases: microsoft/TypeScript at the commit the front-end pins as its
+# _submodules/TypeScript submodule.
+cases     microsoft/TypeScript 4d4f005c8541e0255a9d8791205fdce326e462bc
+
+# Baselines: the Go compiler's emit, from the same port revision, under
+# testdata/baselines/reference/submodule. Vendored at C3, not yet present.
+baselines github.com/tamnd/typescript 7e0a8605ba83 testdata/baselines/reference/submodule
+
+version   6.0.0-dev (tsgo-port)
+copied    2026-07-19

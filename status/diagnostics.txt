@@ -1,0 +1,118 @@
+# Diagnostics-wrong ratchet for the ts-compat suite, tier T3.
+#
+# Each line is an error case, one TypeScript rejects with an .errors.txt baseline,
+# whose Go bento emits and builds anyway: bento runs a program TypeScript refused
+# to compile, which is unsound. The trailing code is the first diagnostic
+# TypeScript reported, recording why it rejected the case. Every line is bento
+# soundness debt, to be fixed by making bento refuse the case, its checker
+# reporting the error or its lowerer handing back, never by dropping the baseline.
+# This set may only shrink.
+#
+# T3 is soundness only: it never checks that bento reports the same code, only
+# that bento does not run a rejected program. Coverage over C4 is gated on the
+# typed/ checker maturing enough to reject these cases.
+#
+# Regenerate with: go test ./suite -run TestDiagnostics -update-diagnostics
+wrong compiler/arrowFunctionWithObjectLiteralBody1.ts TS7006
+wrong compiler/arrowFunctionWithObjectLiteralBody2.ts TS7006
+wrong compiler/bigIntWithTargetLessThanES2016.ts TS2791
+wrong compiler/checkJsObjectLiteralHasCheckedKeyof.ts TS2322
+wrong compiler/commaOperator1.ts TS2695
+wrong compiler/conditionalAnyCheckTypePicksBothBranches.ts TS2322
+wrong compiler/contextualTyping38.ts TS7006
+wrong compiler/declFileEmitDeclarationOnlyError1.ts TS5069
+wrong compiler/doubleUnderStringLiteralAssignability.ts TS2322
+wrong compiler/firstMatchRegExpMatchArray.ts TS2322
+wrong compiler/genericIndexedAccessVarianceComparisonResultCorrect.ts TS2322
+wrong compiler/implicitAnyDeclareFunctionWithoutFormalType.ts TS7006
+wrong compiler/implicitAnyFunctionOverloadWithImplicitAnyReturnType.ts TS7010
+wrong compiler/incrementalInvalid.ts TS5074
+wrong compiler/indexedAccessImplicitlyAny.ts TS2551
+wrong compiler/isolatedDeclarationErrorsFunctionDeclarations.ts TS9007
+wrong compiler/isolatedModulesAmbientConstEnum.ts TS2748
+wrong compiler/jsFileCompilationAmbientVarDeclarationSyntax.ts TS5055
+wrong compiler/jsFileCompilationEnumSyntax.ts TS5055
+wrong compiler/jsFileCompilationInterfaceSyntax.ts TS5055
+wrong compiler/jsFileCompilationOptionalClassElementSyntaxOfClass.ts TS5055
+wrong compiler/jsFileCompilationOptionalParameter.ts TS5055
+wrong compiler/jsFileCompilationPublicParameterModifier.ts TS5055
+wrong compiler/jsFileCompilationSyntaxError.ts TS5055
+wrong compiler/jsFileCompilationTypeOfParameter.ts TS5055
+wrong compiler/jsFileCompilationTypeSyntaxOfVar.ts TS5055
+wrong compiler/jsFileCompilationWithoutJsExtensions.ts TS6504
+wrong compiler/jsdocTypeCast.ts TS2322
+wrong compiler/jsdocTypedefNoCrash.ts TS1003
+wrong compiler/noCrashOnNoLib.ts TS2318
+wrong compiler/omitTypeTestErrors01.ts TS2339
+wrong compiler/optionsCompositeWithIncrementalFalse.ts TS6379
+wrong compiler/optionsInlineSourceMapMapRoot.ts TS5053
+wrong compiler/optionsInlineSourceMapSourcemap.ts TS5053
+wrong compiler/reachabilityChecks3.ts TS7028
+wrong compiler/requiredInitializedParameter1.ts TS2554
+wrong compiler/signatureLengthMismatchInOverload.ts TS2769
+wrong compiler/typeOfOperator1.ts TS2322
+wrong compiler/unusedDestructuringParameters.ts TS6133
+wrong compiler/unusedLocalsOnFunctionDeclarationWithinFunctionDeclaration1.ts TS6133
+wrong compiler/unusedLocalsOnFunctionDeclarationWithinFunctionDeclaration2.ts TS6133
+wrong compiler/unusedLocalsOnFunctionDeclarationWithinFunctionExpression1.ts TS6133
+wrong compiler/unusedLocalsOnFunctionDeclarationWithinFunctionExpression2.ts TS6133
+wrong compiler/unusedLocalsOnFunctionExpressionWithinFunctionDeclaration1.ts TS6133
+wrong compiler/unusedLocalsOnFunctionExpressionWithinFunctionDeclaration2.ts TS6133
+wrong compiler/unusedLocalsOnFunctionExpressionWithinFunctionExpression1.ts TS6133
+wrong compiler/unusedLocalsOnFunctionExpressionWithinFunctionExpression2.ts TS6133
+wrong compiler/unusedLocalsinConstructor1.ts TS6133
+wrong compiler/unusedLocalsinConstructor2.ts TS6133
+wrong compiler/unusedMultipleParameter1InContructor.ts TS6133
+wrong compiler/unusedMultipleParameter1InFunctionExpression.ts TS6133
+wrong compiler/unusedMultipleParameter2InContructor.ts TS6133
+wrong compiler/unusedMultipleParameter2InFunctionExpression.ts TS6133
+wrong compiler/unusedMultipleParameters1InFunctionDeclaration.ts TS6133
+wrong compiler/unusedMultipleParameters2InFunctionDeclaration.ts TS6133
+wrong compiler/unusedParameterProperty1.ts TS6138
+wrong compiler/unusedParameterProperty2.ts TS6138
+wrong compiler/unusedParametersinConstructor1.ts TS6133
+wrong compiler/unusedParametersinConstructor2.ts TS6133
+wrong compiler/unusedParametersinConstructor3.ts TS6133
+wrong compiler/unusedSingleParameterInContructor.ts TS6133
+wrong compiler/unusedSingleParameterInFunctionDeclaration.ts TS6133
+wrong compiler/unusedSingleParameterInFunctionExpression.ts TS6133
+wrong compiler/unusedTypeParameterInInterface1.ts TS6196
+wrong compiler/unusedTypeParameterInInterface2.ts TS6196
+wrong compiler/unusedTypeParameters10.ts TS6196
+wrong compiler/unusedTypeParameters_infer.ts TS6196
+wrong compiler/unusedVariablesinBlocks1.ts TS6133
+wrong compiler/unusedVariablesinBlocks2.ts TS6133
+wrong compiler/unusedVariablesinForLoop.ts TS6133
+wrong compiler/unusedVariablesinForLoop3.ts TS6133
+wrong compiler/unusedVariablesinForLoop4.ts TS6133
+wrong conformance/classes/members/privateNames/privateNamesAndkeyof.ts TS2322
+wrong conformance/classes/members/privateNames/privateNamesIncompatibleModifiersJs.ts TS18010
+wrong conformance/es2017/useObjectValuesAndEntries3.ts TS2550
+wrong conformance/es2017/useSharedArrayBuffer3.ts TS2583
+wrong conformance/es6/Symbols/symbolProperty59.ts TS2464
+wrong conformance/es6/computedProperties/computedPropertyNames5_ES6.ts TS2464
+wrong conformance/es6/computedProperties/computedPropertyNames9_ES6.ts TS2464
+wrong conformance/es6/computedProperties/computedPropertyNamesDeclarationEmit6_ES6.ts TS2464
+wrong conformance/es6/templates/templateStringInArrowFunction.ts TS7006
+wrong conformance/es6/templates/templateStringInEqualityChecks.ts TS2367
+wrong conformance/es6/templates/templateStringInEqualityChecksES6.ts TS2367
+wrong conformance/jsdoc/callbackTagVariadicType.ts TS2370
+wrong conformance/jsdoc/checkJsdocOptionalParamOrder.ts TS1016
+wrong conformance/jsdoc/checkJsdocSatisfiesTag15.ts TS2322
+wrong conformance/jsdoc/checkJsdocTypedefOnlySourceFile.ts TS1003
+wrong conformance/jsdoc/declarations/jsDeclarationsOptionalTypeLiteralProps1.ts TS18048
+wrong conformance/jsdoc/declarations/jsDeclarationsReusesExistingNodesMappingJSDocTypes.ts TS1110
+wrong conformance/jsdoc/jsdocTemplateTagDefault.ts TS2322
+wrong conformance/jsdoc/jsdocTemplateTagNameResolution.ts TS2322
+wrong conformance/jsdoc/typeTagNoErasure.ts TS2345
+wrong conformance/jsdoc/typedefScope1.ts TS2304
+wrong conformance/parser/ecmascript6/ComputedPropertyNames/parserComputedPropertyName41.ts TS2464
+wrong conformance/types/contextualTypes/commaOperator/contextuallyTypeCommaOperator03.ts TS7006
+wrong conformance/types/literal/stringLiteralsWithEqualityChecks01.ts TS2367
+wrong conformance/types/literal/stringLiteralsWithEqualityChecks02.ts TS2367
+wrong conformance/types/literal/stringLiteralsWithSwitchStatements02.ts TS2367
+wrong conformance/types/literal/templateLiteralTypesPatternsPrefixSuffixAssignability.ts TS2322
+wrong conformance/types/mapped/mappedTypeAsClauses.ts TS2345
+wrong conformance/types/primitives/void/validVoidValues.ts TS2322
+wrong conformance/types/stringLiteral/stringLiteralTypesWithTemplateStrings02.ts TS2322
+wrong conformance/types/typeRelationships/recursiveTypes/recursiveTypeReferences2.ts TS2322

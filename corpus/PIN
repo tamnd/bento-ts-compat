@@ -10,8 +10,10 @@ frontend  github.com/tamnd/typescript v0.0.0-20260716030941-7e0a8605ba83
 # _submodules/TypeScript submodule.
 cases     microsoft/TypeScript 4d4f005c8541e0255a9d8791205fdce326e462bc
 
-# Baselines: the Go compiler's emit, from the same port revision, under
-# testdata/baselines/reference/submodule. Vendored at C3, not yet present.
+# Baselines: the TypeScript compiler's own .js emit, from the same port revision,
+# under testdata/baselines/reference/submodule. Only the accepted cases' baselines
+# are vendored, the subset the runtime tier turns into oracles, kept in sync by
+# scripts/vendor-baselines.sh. See 05 for why this narrows doc 01's wholesale copy.
 baselines github.com/tamnd/typescript 7e0a8605ba83 testdata/baselines/reference/submodule
 
 version   6.0.0-dev (tsgo-port)

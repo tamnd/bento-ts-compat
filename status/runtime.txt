@@ -1,0 +1,8 @@
+# Runtime-wrong ratchet for the ts-compat suite, tier T2.
+#
+# Each line is a case whose emitted Go compiles and runs but disagrees with its
+# frozen oracle: wrong stdout, a wrong exit, or a panic. Every line is a bento
+# lowering bug that builds clean, to be fixed by making bento emit correct Go,
+# never by dropping the oracle. This set may only shrink.
+#
+# Regenerate with: go test ./suite -run TestRuntime -update-runtime

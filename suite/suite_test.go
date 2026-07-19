@@ -3,8 +3,11 @@ package suite
 import (
 	"flag"
 	"os"
+	"os/exec"
 	"path"
 	"runtime"
+	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -45,6 +48,28 @@ var updateLedger = flag.Bool("update-ledger", false, "rewrite status/ledger.txt 
 // ones, and on a full run prunes a golden whose case no longer accepts. It is the
 // one supported way to move a golden, so an emit change lands as a reviewed diff.
 var updateGoldens = flag.Bool("update-goldens", false, "rewrite goldens/ from the current emit")
+
+// updateOracles, set by `go test -run TestGenOracle -update-oracles`, drives the
+// accepted cases' vendored .js baselines through Node under the non-determinism
+// and environment screens and freezes the survivors as oracles/<id>.txt. It is
+// the one path that needs Node, and the only supported way to move the oracle
+// set, so a coverage change in the oracles lands as a reviewed diff. Without it
+// the generator does nothing, because the runtime tier reads the frozen oracles
+// and never needs Node itself.
+var updateOracles = flag.Bool("update-oracles", false, "regenerate oracles/ from the .js baselines on Node")
+
+// updateRuntime, set by `go test -run TestRuntime -update-runtime`, rewrites the
+// runtime-wrong ratchet status/runtime.txt from the current runtime comparison
+// instead of checking against the committed one. It is the one supported way to
+// move that baseline, so a fixed miscompile leaves the ratchet as a reviewed diff.
+var updateRuntime = flag.Bool("update-runtime", false, "rewrite status/runtime.txt from the current runtime comparison")
+
+// shard, set by `go test -shard i/N`, runs only the i-th of N even slices of the
+// selected cases, counting from zero. It is how the runtime tier's heavy go-run
+// pass is split across parallel CI jobs, each job taking one shard, so no single
+// job compiles and runs the whole set. Empty runs everything. The slicing is by
+// position in the sorted case list, so the shards are disjoint and cover the set.
+var shard = flag.String("shard", "", "run only shard i of N, as i/N, counting from zero")
 
 // defaultJobs picks a worker count that keeps the machine responsive: half its
 // logical CPUs, at least one. The per-case work is memory heavy, so leaving cores
@@ -364,4 +389,276 @@ func checkNoOrphanGoldens(t *testing.T, accepted map[string]string) {
 			t.Errorf("orphan golden %s has no accepting case (run -update-goldens to prune)", id)
 		}
 	}
+}
+
+// applyShard slices ids to the -shard selection, returning it whole when no
+// shard is set. The spec is i/N, and the slice is the i-th of N contiguous even
+// parts of the already-sorted ids, so the shards partition the set with no
+// overlap and no gap. A malformed spec or an out-of-range index is fatal, since a
+// shard that silently selects nothing would pass a CI job for the wrong reason.
+func applyShard(t *testing.T, ids []string) []string {
+	t.Helper()
+	if *shard == "" {
+		return ids
+	}
+	iStr, nStr, ok := strings.Cut(*shard, "/")
+	i, err1 := strconv.Atoi(iStr)
+	n, err2 := strconv.Atoi(nStr)
+	if !ok || err1 != nil || err2 != nil || n < 1 || i < 0 || i >= n {
+		t.Fatalf("bad -shard %q, want i/N with 0 <= i < N", *shard)
+	}
+	lo := len(ids) * i / n
+	hi := len(ids) * (i + 1) / n
+	return ids[lo:hi]
+}
+
+// nodeBin returns the Node binary the oracle generator runs baselines on,
+// honoring $NODE and falling back to node on PATH. A run without Node is skipped,
+// not failed: generation is a maintainer step that needs Node, while the runtime
+// tier that CI runs reads the frozen oracles and does not.
+func nodeBin(t *testing.T) string {
+	t.Helper()
+	bin := os.Getenv("NODE")
+	if bin == "" {
+		bin = "node"
+	}
+	if _, err := exec.LookPath(bin); err != nil {
+		t.Skipf("node not found (set $NODE or install node to regenerate oracles): %v", err)
+	}
+	return bin
+}
+
+// oracleCandidates returns the accepted cases that have a vendored .js baseline,
+// the set the generator can try to turn into an oracle. A case with no baseline
+// has no ground truth to run against and is left to the tiers below.
+func oracleCandidates(results map[string]Result) []Case {
+	var out []Case
+	for id, r := range results {
+		if r.Outcome != Pass {
+			continue
+		}
+		if !ResolveBaseline(baselinesRoot, id).HasJS() {
+			continue
+		}
+		out = append(out, Case{ID: id})
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
+	return out
+}
+
+// TestGenOracle regenerates the runtime oracles from the vendored .js baselines,
+// the one step that needs Node. For each accepted case with a baseline it runs
+// the compiled JS through the non-determinism and environment screens, and
+// freezes the survivors as oracles/<id>.txt. A skipped case, one that throws or
+// is non-deterministic or environment-sensitive, has any stale oracle removed, so
+// the oracle tree stays exactly the set the runtime tier can trust.
+//
+// It runs only under -update-oracles, because it is a maintainer step with a Node
+// dependency, not a gate. Without the flag it is a no-op, and CI checks the
+// frozen oracles through TestRuntime instead.
+func TestGenOracle(t *testing.T) {
+	if !*updateOracles {
+		t.Skip("oracle generation runs only under -update-oracles, it needs Node")
+	}
+	bin := nodeBin(t)
+	results := fullCorpus(t)
+	candidates := oracleCandidates(results)
+
+	scratch, err := os.MkdirTemp("", "genoracle-")
+	if err != nil {
+		t.Fatalf("scratch dir: %v", err)
+	}
+	defer func() { _ = os.RemoveAll(scratch) }()
+
+	var wrote, skipped int
+	for _, c := range candidates {
+		content, err := os.ReadFile(ResolveBaseline(baselinesRoot, c.ID).JS)
+		if err != nil {
+			t.Fatalf("read baseline %s: %v", c.ID, err)
+		}
+		js, module := extractJSBaseline(string(content))
+		if strings.TrimSpace(js) == "" {
+			// No compiled output section: nothing to run, so no oracle.
+			_ = removeOracle(c.ID)
+			skipped++
+			continue
+		}
+		o, skip, err := generateOracle(bin, scratch, js, module)
+		if err != nil {
+			t.Fatalf("run baseline %s on node: %v", c.ID, err)
+		}
+		if skip != "" {
+			_ = removeOracle(c.ID)
+			skipped++
+			continue
+		}
+		if err := writeOracle(c.ID, o); err != nil {
+			t.Fatalf("write oracle %s: %v", c.ID, err)
+		}
+		wrote++
+	}
+	pruneOrphanOracles(t, candidates)
+	t.Logf("oracles: froze %d, skipped %d of %d accepted cases with a baseline", wrote, skipped, len(candidates))
+}
+
+// pruneOrphanOracles removes an oracle whose case is no longer an accepted
+// candidate, so a coverage change that drops a case from the accepted set drops
+// its oracle too. The candidate set already covers every case the generator
+// wrote or skipped, so anything else under oracles/ is stale.
+func pruneOrphanOracles(t *testing.T, candidates []Case) {
+	t.Helper()
+	live := map[string]bool{}
+	for _, c := range candidates {
+		live[c.ID] = true
+	}
+	have, err := existingOracles()
+	if err != nil {
+		t.Fatalf("scan oracles: %v", err)
+	}
+	for id := range have {
+		if !live[id] {
+			if err := removeOracle(id); err != nil {
+				t.Fatalf("prune orphan oracle %s: %v", id, err)
+			}
+		}
+	}
+}
+
+// TestRuntime is T2, the runtime tier: it compiles and runs each case's emitted
+// Go and checks the result against the case's frozen oracle. It needs no Node,
+// only the frozen oracles and the Go toolchain, so CI runs it directly. The
+// emitted Go it runs is the committed golden, which the emit tier holds equal to
+// the live emit, so the runtime tier measures the same Go a reviewer reads.
+//
+// A case whose Go runs but disagrees with its oracle, wrong stdout or a wrong
+// exit or a panic, is runtime-wrong. Like the accept tier's wrong set this is a
+// ratchet the committed status/runtime.txt carries: a fresh runtime-wrong not in
+// it fails the run and names itself, while the known debt is reported and burned
+// down by fixing bento. -update-runtime refreezes the ratchet after a fix, and
+// -shard splits the heavy go-run pass across CI jobs.
+func TestRuntime(t *testing.T) {
+	have, err := existingOracles()
+	if err != nil {
+		t.Fatalf("scan oracles: %v", err)
+	}
+	ids := make([]string, 0, len(have))
+	for id := range have {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	if *filter != "" {
+		var kept []string
+		for _, id := range ids {
+			if matchFilter(id, *filter) {
+				kept = append(kept, id)
+			}
+		}
+		ids = kept
+	}
+	ids = applyShard(t, ids)
+	if len(ids) == 0 {
+		if *filter != "" || *shard != "" {
+			t.Skip("no oracles match the filter or shard")
+		}
+		t.Skip("no oracles vendored yet, run -update-oracles to generate them")
+	}
+
+	root := moduleRoot(t)
+	wrong := runtimeWrong(t, root, ids)
+
+	known := parseRuntimeLedger(readRuntimeLedger(t))
+	if *updateRuntime && *filter == "" && *shard == "" {
+		if err := os.WriteFile(runtimeLedgerPath, []byte(formatRuntimeLedger(wrong)), 0o644); err != nil {
+			t.Fatalf("write runtime ledger: %v", err)
+		}
+		t.Logf("runtime tier: refroze ratchet with %d wrong of %d checked", len(wrong), len(ids))
+		return
+	}
+	fresh := 0
+	for _, w := range wrong {
+		id, reason, _ := strings.Cut(w, "\t")
+		if !known[id] {
+			fresh++
+			t.Errorf("NEW RUNTIME WRONG %s: %s", id, reason)
+		}
+	}
+	t.Logf("runtime tier: %d checked, %d wrong (%d known debt, %d fresh)", len(ids), len(wrong), len(wrong)-fresh, fresh)
+	if fresh > 0 {
+		t.Fatalf("%d cases run wrong and are not in status/runtime.txt, this must be zero", fresh)
+	}
+}
+
+// runtimeWrong runs every selected case's golden Go through a bounded worker pool
+// and returns the ids that disagree with their oracle, each tab-joined to the
+// reason so a fresh regression can report why. The pool bound matters as much as
+// at the accept tier: every worker holds a go run, so the width caps how many
+// compiles live at once.
+func runtimeWrong(t *testing.T, root string, ids []string) []string {
+	t.Helper()
+	var (
+		mu    sync.Mutex
+		wrong []string
+	)
+	work := make(chan string)
+	var wg sync.WaitGroup
+	for range *jobs {
+		wg.Go(func() {
+			for id := range work {
+				if reason := checkRuntime(root, id); reason != "" {
+					mu.Lock()
+					wrong = append(wrong, id+"\t"+reason)
+					mu.Unlock()
+				}
+			}
+		})
+	}
+	for _, id := range ids {
+		work <- id
+	}
+	close(work)
+	wg.Wait()
+	sort.Strings(wrong)
+	return wrong
+}
+
+// checkRuntime runs one case's golden Go and compares it to the case's oracle,
+// returning the mismatch reason or an empty string on a match. A missing golden
+// or oracle, or a toolchain that will not launch, is itself the reason, since a
+// case that cannot be run has not been shown to run right.
+func checkRuntime(root, id string) string {
+	goSrc, err := os.ReadFile(goldenPath(id))
+	if err != nil {
+		return "read golden: " + err.Error()
+	}
+	oracleContent, err := os.ReadFile(oraclePath(id))
+	if err != nil {
+		return "read oracle: " + err.Error()
+	}
+	want, err := ParseOracle(string(oracleContent))
+	if err != nil {
+		return "parse oracle: " + err.Error()
+	}
+	got, err := runGo(root, string(goSrc))
+	if err != nil {
+		return "run go: " + err.Error()
+	}
+	ok, why := oracleMatch(want, got)
+	if ok {
+		return ""
+	}
+	return why
+}
+
+// readRuntimeLedger reads the committed runtime ratchet, treating a missing file
+// as an empty ratchet so the tier works before the first freeze.
+func readRuntimeLedger(t *testing.T) string {
+	t.Helper()
+	data, err := os.ReadFile(runtimeLedgerPath)
+	if os.IsNotExist(err) {
+		return ""
+	}
+	if err != nil {
+		t.Fatalf("read runtime ledger: %v", err)
+	}
+	return string(data)
 }

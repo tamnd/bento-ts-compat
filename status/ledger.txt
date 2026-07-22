@@ -175,8 +175,6 @@ handback  compiler/argumentsAsPropertyName.ts
 handback  compiler/argumentsAsPropertyName2.ts
 handback  compiler/argumentsBindsToFunctionScopeArgumentList.ts
 handback  compiler/argumentsObjectCreatesRestForJs.ts
-wrong     compiler/argumentsObjectIterator01_ES5.ts
-wrong     compiler/argumentsObjectIterator01_ES6.ts
 handback  compiler/argumentsObjectIterator02_ES5.ts
 handback  compiler/argumentsObjectIterator02_ES6.ts
 handback  compiler/argumentsObjectIterator03_ES5.ts
@@ -326,8 +324,6 @@ handback  compiler/assignmentCompatability40.ts
 handback  compiler/assignmentCompatability41.ts
 handback  compiler/assignmentCompatability42.ts
 handback  compiler/assignmentCompatability43.ts
-wrong     compiler/assignmentCompatability44.ts
-wrong     compiler/assignmentCompatability45.ts
 handback  compiler/assignmentCompatability46.ts
 handback  compiler/assignmentCompatability5.ts
 handback  compiler/assignmentCompatability6.ts
@@ -346,7 +342,6 @@ handback  compiler/assignmentToAnyArrayRestParameters.ts
 handback  compiler/assignmentToConditionalBrandedStringTemplateOrMapping.ts
 handback  compiler/assignmentToFunction.ts
 handback  compiler/assignmentToInstantiationExpression.ts
-wrong     compiler/assignmentToObject.ts
 handback  compiler/assignmentToObjectAndFunction.ts
 handback  compiler/assignmentToParenthesizedExpression1.ts
 handback  compiler/assignmentToReferenceTypes.ts
@@ -457,7 +452,6 @@ handback  compiler/blockScopedBindingUsedBeforeDef.ts
 handback  compiler/blockScopedBindingsReassignedInLoop1.ts
 handback  compiler/blockScopedBindingsReassignedInLoop2.ts
 handback  compiler/blockScopedBindingsReassignedInLoop3.ts
-wrong     compiler/blockScopedBindingsReassignedInLoop4.ts
 handback  compiler/blockScopedBindingsReassignedInLoop6.ts
 handback  compiler/blockScopedClassDeclarationAcrossFiles.ts
 handback  compiler/blockScopedEnumVariablesUseBeforeDef.ts
@@ -521,7 +515,6 @@ handback  compiler/cannotIndexGenericWritingError.ts
 handback  compiler/cannotInvokeNewOnErrorExpression.ts
 handback  compiler/cannotInvokeNewOnIndexExpression.ts
 handback  compiler/captureSuperPropertyAccessInSuperCall01.ts
-wrong     compiler/captureThisInSuperCall.ts
 handback  compiler/capturedLetConstInLoop1.ts
 handback  compiler/capturedLetConstInLoop12.ts
 handback  compiler/capturedLetConstInLoop13.ts
@@ -598,7 +591,6 @@ handback  compiler/checkSuperCallBeforeThisAccessing3.ts
 handback  compiler/checkSuperCallBeforeThisAccessing4.ts
 handback  compiler/checkSuperCallBeforeThisAccessing5.ts
 handback  compiler/checkSuperCallBeforeThisAccessing6.ts
-wrong     compiler/checkSuperCallBeforeThisAccessing7.ts
 handback  compiler/checkSuperCallBeforeThisAccessing8.ts
 handback  compiler/checkSuperCallBeforeThisAccessing9.ts
 handback  compiler/checkSwitchStatementIfCaseTypeIsString.ts
@@ -703,7 +695,6 @@ handback  compiler/classIndexer4.ts
 handback  compiler/classIndexer5.ts
 handback  compiler/classInheritence.ts
 handback  compiler/classMemberInitializerScoping.ts
-wrong     compiler/classMemberInitializerScoping2.ts
 handback  compiler/classMemberInitializerWithLamdaScoping.ts
 handback  compiler/classMemberInitializerWithLamdaScoping2.ts
 handback  compiler/classMemberInitializerWithLamdaScoping3.ts
@@ -725,7 +716,6 @@ handback  compiler/classPropertyInferenceFromBroaderTypeConst.ts
 handback  compiler/classReferencedInContextualParameterWithinItsOwnBaseExpression.ts
 handback  compiler/classSideInheritance1.ts
 handback  compiler/classSideInheritance2.ts
-wrong     compiler/classSideInheritance3.ts
 handback  compiler/classStaticInitializersUsePropertiesBeforeDeclaration.ts
 handback  compiler/classStaticPropertyAccess.ts
 handback  compiler/classStaticPropertyTypeGuard.ts
@@ -852,7 +842,6 @@ handback  compiler/commentOnArrayElement10.ts
 handback  compiler/commentOnArrayElement11.ts
 handback  compiler/commentOnArrayElement12.ts
 handback  compiler/commentOnArrayElement3.ts
-wrong     compiler/commentOnClassMethod1.ts
 handback  compiler/commentOnDecoratedClassDeclaration.ts
 handback  compiler/commentOnElidedModule1.ts
 handback  compiler/commentOnImportStatement1.ts
@@ -957,7 +946,6 @@ handback  compiler/conditionalExpressionNewLine6.ts
 handback  compiler/conditionalExpressionNewLine7.ts
 handback  compiler/conditionalExpressionNewLine8.ts
 handback  compiler/conditionalExpressionNewLine9.ts
-handback  compiler/conditionalExpressions2.ts
 handback  compiler/conditionalReturnExpression.ts
 handback  compiler/conditionalTypeAssignabilityWhenDeferred.ts
 handback  compiler/conditionalTypeBasedContextualTypeReturnTypeWidening.ts
@@ -995,7 +983,6 @@ handback  compiler/constDeclarations-ambient.ts
 handback  compiler/constDeclarations-errors.ts
 handback  compiler/constDeclarations-invalidContexts.ts
 handback  compiler/constDeclarations-scopes.ts
-wrong     compiler/constDeclarations-scopes2.ts
 handback  compiler/constDeclarations-useBeforeDefinition.ts
 handback  compiler/constDeclarations-useBeforeDefinition2.ts
 handback  compiler/constDeclarations-validContexts.ts
@@ -1018,8 +1005,6 @@ handback  compiler/constEnumPreserveEmitNamedExport1.ts
 handback  compiler/constEnumPreserveEmitNamedExport2.ts
 handback  compiler/constEnumPreserveEmitReexport.ts
 handback  compiler/constEnumSyntheticNodesComments.ts
-wrong     compiler/constEnumToStringNoComments.ts
-wrong     compiler/constEnumToStringWithComments.ts
 handback  compiler/constEnums.ts
 handback  compiler/constInClassExpression.ts
 handback  compiler/constIndexedAccess.ts
@@ -1121,27 +1106,20 @@ handback  compiler/contextualTyping12.ts
 handback  compiler/contextualTyping14.ts
 handback  compiler/contextualTyping15.ts
 handback  compiler/contextualTyping17.ts
-wrong     compiler/contextualTyping18.ts
 handback  compiler/contextualTyping2.ts
 handback  compiler/contextualTyping20.ts
 handback  compiler/contextualTyping21.ts
 handback  compiler/contextualTyping23.ts
 handback  compiler/contextualTyping24.ts
-wrong     compiler/contextualTyping25.ts
-wrong     compiler/contextualTyping26.ts
-wrong     compiler/contextualTyping27.ts
 handback  compiler/contextualTyping3.ts
 handback  compiler/contextualTyping30.ts
 handback  compiler/contextualTyping32.ts
 handback  compiler/contextualTyping33.ts
-wrong     compiler/contextualTyping36.ts
 handback  compiler/contextualTyping37.ts
 handback  compiler/contextualTyping39.ts
 handback  compiler/contextualTyping4.ts
 handback  compiler/contextualTyping41.ts
 handback  compiler/contextualTyping5.ts
-wrong     compiler/contextualTyping7.ts
-wrong     compiler/contextualTyping8.ts
 handback  compiler/contextualTyping9.ts
 handback  compiler/contextualTypingArrayDestructuringWithDefaults.ts
 handback  compiler/contextualTypingArrayOfLambdas.ts
@@ -1155,7 +1133,6 @@ handback  compiler/contextualTypingOfGenericFunctionTypedArguments1.ts
 handback  compiler/contextualTypingOfLambdaReturnExpression.ts
 handback  compiler/contextualTypingOfLambdaWithMultipleSignatures.ts
 handback  compiler/contextualTypingOfLambdaWithMultipleSignatures2.ts
-wrong     compiler/contextualTypingOfObjectLiterals.ts
 handback  compiler/contextualTypingOfObjectLiterals2.ts
 handback  compiler/contextualTypingOfOptionalMembers.tsx
 handback  compiler/contextualTypingOfTooShortOverloads.ts
@@ -1219,7 +1196,6 @@ handback  compiler/controlFlowForFunctionLike1.ts
 handback  compiler/controlFlowForIndexSignatures.ts
 handback  compiler/controlFlowForStatementContinueIntoIncrementor1.ts
 handback  compiler/controlFlowFunctionLikeCircular1.ts
-wrong     compiler/controlFlowInitializedDestructuringVariables.ts
 handback  compiler/controlFlowInstanceof.ts
 handback  compiler/controlFlowInstanceofWithSymbolHasInstance.ts
 handback  compiler/controlFlowJavascript.ts
@@ -1255,7 +1231,6 @@ handback  compiler/crashOnMethodSignatures.ts
 handback  compiler/crashRegressionTest.ts
 handback  compiler/createArray.ts
 handback  compiler/crossFileOverloadModifierConsistency.ts
-handback  compiler/ctsFileInEsnextHelpers.ts
 handback  compiler/customAsyncIterator.ts
 handback  compiler/customEventDetail.ts
 handback  compiler/cyclicGenericTypeInstantiation.ts
@@ -1275,7 +1250,6 @@ handback  compiler/declFileConstructSignatures.ts
 handback  compiler/declFileConstructors.ts
 handback  compiler/declFileEmitDeclarationOnly.ts
 handback  compiler/declFileEmitDeclarationOnlyError2.ts
-wrong     compiler/declFileEnumUsedAsValue.ts
 handback  compiler/declFileEnums.ts
 handback  compiler/declFileExportAssignmentImportInternalModule.ts
 handback  compiler/declFileExportAssignmentOfGenericInterface.ts
@@ -1306,7 +1280,6 @@ handback  compiler/declFilePrivateMethodOverloads.ts
 handback  compiler/declFilePrivateStatic.ts
 handback  compiler/declFileRestParametersOfFunctionAndFunctionType.ts
 handback  compiler/declFileTypeAnnotationArrayType.ts
-wrong     compiler/declFileTypeAnnotationBuiltInType.ts
 handback  compiler/declFileTypeAnnotationParenType.ts
 handback  compiler/declFileTypeAnnotationStringLiteral.ts
 handback  compiler/declFileTypeAnnotationTupleType.ts
@@ -1322,7 +1295,6 @@ handback  compiler/declFileTypeAnnotationVisibilityErrorTypeAlias.ts
 handback  compiler/declFileTypeAnnotationVisibilityErrorTypeLiteral.ts
 handback  compiler/declFileTypeAnnotationVisibilityErrorVariableDeclaration.ts
 handback  compiler/declFileTypeofClass.ts
-wrong     compiler/declFileTypeofEnum.ts
 handback  compiler/declFileTypeofFunction.ts
 handback  compiler/declFileTypeofInAnonymousType.ts
 handback  compiler/declFileTypeofModule.ts
@@ -1345,9 +1317,7 @@ handback  compiler/declarationEmitAmdModuleDefault.ts
 handback  compiler/declarationEmitAmdModuleNameDirective.ts
 handback  compiler/declarationEmitAnyComputedPropertyInClass.ts
 handback  compiler/declarationEmitArrowFunctionNoRenaming.ts
-wrong     compiler/declarationEmitBindingPatternWithReservedWord.ts
 handback  compiler/declarationEmitBindingPatterns.ts
-wrong     compiler/declarationEmitBindingPatternsFunctionExpr.ts
 handback  compiler/declarationEmitBindingPatternsUnused.ts
 handback  compiler/declarationEmitBundleWithAmbientReferences.ts
 handback  compiler/declarationEmitBundlerConditions.ts
@@ -1359,7 +1329,6 @@ handback  compiler/declarationEmitCastReusesTypeNode5.ts
 handback  compiler/declarationEmitClassAccessorsJs1.ts
 handback  compiler/declarationEmitClassInherritsAny.ts
 handback  compiler/declarationEmitClassMemberNameConflict.ts
-wrong     compiler/declarationEmitClassMemberNameConflict2.ts
 handback  compiler/declarationEmitClassMemberWithComputedPropertyName.ts
 handback  compiler/declarationEmitClassMixinLocalClassDeclaration.ts
 handback  compiler/declarationEmitClassPrivateConstructor.ts
@@ -1391,7 +1360,6 @@ handback  compiler/declarationEmitDefaultExport8.ts
 handback  compiler/declarationEmitDefaultExportWithStaticAssignment.ts
 handback  compiler/declarationEmitDefaultExportWithTempVarName.ts
 handback  compiler/declarationEmitDefaultExportWithTempVarNameWithBundling.ts
-handback  compiler/declarationEmitDestructuring1.ts
 handback  compiler/declarationEmitDestructuring2.ts
 handback  compiler/declarationEmitDestructuring3.ts
 handback  compiler/declarationEmitDestructuring4.ts
@@ -1481,7 +1449,6 @@ handback  compiler/declarationEmitMappedTypeDistributivityPreservesConstraints.t
 handback  compiler/declarationEmitMappedTypePreservesTypeParameterConstraint.ts
 handback  compiler/declarationEmitMappedTypePropertyFromNumericStringKey.ts
 handback  compiler/declarationEmitMappedTypeTemplateTypeofSymbol.ts
-wrong     compiler/declarationEmitMergedAliasWithConst.ts
 handback  compiler/declarationEmitMethodDeclaration.ts
 handback  compiler/declarationEmitMixinPrivateProtected.ts
 handback  compiler/declarationEmitModuleWithScopeMarker.ts
@@ -1498,8 +1465,6 @@ handback  compiler/declarationEmitNestedGenerics.ts
 handback  compiler/declarationEmitNoInvalidCommentReuse1.ts
 handback  compiler/declarationEmitNoInvalidCommentReuse2.ts
 handback  compiler/declarationEmitNoInvalidCommentReuse3.ts
-wrong     compiler/declarationEmitNoNonRequiredParens.ts
-wrong     compiler/declarationEmitNonExportedBindingPattern.ts
 handback  compiler/declarationEmitObjectAssignedDefaultExport.ts
 handback  compiler/declarationEmitObjectLiteralAccessors1.ts
 handback  compiler/declarationEmitObjectLiteralAccessorsJs1.ts
@@ -1509,6 +1474,7 @@ handback  compiler/declarationEmitOptionalMappedTypePropertyNoStrictNullChecks1.
 handback  compiler/declarationEmitOptionalMappedTypePropertyNoStrictNullChecks2.ts
 handback  compiler/declarationEmitOptionalMappedTypePropertyNoStrictNullChecks3.ts
 handback  compiler/declarationEmitOptionalMappedTypePropertyNoStrictNullChecks4.ts
+handback  compiler/declarationEmitOptionalMethod.ts
 handback  compiler/declarationEmitOutFileBundlePaths.ts
 handback  compiler/declarationEmitOverloadedPrivateInference.ts
 handback  compiler/declarationEmitParameterProperty.ts
@@ -1685,7 +1651,6 @@ handback  compiler/defaultValueInFunctionOverload1.ts
 handback  compiler/defaultValueInFunctionTypes.ts
 handback  compiler/deferredConditionalTypes2.ts
 handback  compiler/deferredLookupTypeResolution.ts
-wrong     compiler/defineVariables_useDefineForClassFields.ts
 handback  compiler/definiteAssignmentOfDestructuredVariable.ts
 handback  compiler/definiteAssignmentWithErrorStillStripped.ts
 handback  compiler/deleteExpressionMustBeOptional.ts
@@ -1731,7 +1696,6 @@ handback  compiler/destructuringInVariableDeclarations6.ts
 handback  compiler/destructuringInVariableDeclarations7.ts
 handback  compiler/destructuringInVariableDeclarations8.ts
 handback  compiler/destructuringInitializerContextualTypeFromContext.ts
-wrong     compiler/destructuringPropertyAssignmentNameIsNotAssignmentTarget.ts
 handback  compiler/destructuringTempOccursAfterPrologue.ts
 handback  compiler/destructuringTuple.ts
 handback  compiler/destructuringTypeGuardFlow.ts
@@ -1759,7 +1723,6 @@ handback  compiler/discriminantPropertyInference.ts
 handback  compiler/discriminantUsingEvaluatableTemplateExpression.ts
 handback  compiler/discriminantsAndNullOrUndefined.ts
 handback  compiler/discriminantsAndPrimitives.ts
-handback  compiler/discriminantsAndTypePredicates.ts
 handback  compiler/discriminateWithDivergentAccessors1.ts
 handback  compiler/discriminateWithMissingProperty.ts
 handback  compiler/discriminateWithOptionalProperty1.ts
@@ -1774,7 +1737,6 @@ handback  compiler/dissallowSymbolAsWeakType.ts
 handback  compiler/distributiveConditionalTypeConstraints.ts
 handback  compiler/distributiveConditionalTypeNeverIntersection1.ts
 handback  compiler/divergentAccessors1.ts
-wrong     compiler/divergentAccessorsTypes1.ts
 handback  compiler/divergentAccessorsTypes2.ts
 handback  compiler/divergentAccessorsTypes3.ts
 handback  compiler/divergentAccessorsTypes4.ts
@@ -1953,7 +1915,6 @@ handback  compiler/enumIdentifierLiterals.ts
 handback  compiler/enumIndexer.ts
 handback  compiler/enumLiteralAssignableToEnumInsideUnion.ts
 handback  compiler/enumLiteralUnionNotWidened.ts
-wrong     compiler/enumLiteralsSubtypeReduction.ts
 handback  compiler/enumMapBackIntoItself.ts
 handback  compiler/enumMemberNameNonIdentifier.ts
 handback  compiler/enumMemberReduction.ts
@@ -2274,7 +2235,6 @@ handback  compiler/exportDeclarationsInAmbientNamespaces2.ts
 handback  compiler/exportDeclareClass1.ts
 handback  compiler/exportDefaultAbstractClass.ts
 handback  compiler/exportDefaultAlias_excludesEverything.ts
-wrong     compiler/exportDefaultAsyncFunction.ts
 handback  compiler/exportDefaultAsyncFunction2.ts
 handback  compiler/exportDefaultClassAndValue.ts
 handback  compiler/exportDefaultClassInNamespace.ts
@@ -2326,7 +2286,6 @@ handback  compiler/exportInFunction.ts
 handback  compiler/exportInterfaceClassAndValue.ts
 handback  compiler/exportInterfaceClassAndValueWithDuplicatesInImportList.ts
 handback  compiler/exportNamespaceDeclarationRetainsVisibility.ts
-wrong     compiler/exportObjectRest.ts
 handback  compiler/exportPrivateType.ts
 handback  compiler/exportRedeclarationTypeAliases.ts
 handback  compiler/exportSameNameFuncVar.ts
@@ -2476,7 +2435,6 @@ handback  compiler/functionCall15.ts
 handback  compiler/functionCall16.ts
 handback  compiler/functionCall17.ts
 handback  compiler/functionCall18.ts
-wrong     compiler/functionCall3.ts
 handback  compiler/functionCall5.ts
 handback  compiler/functionCall6.ts
 handback  compiler/functionCall7.ts
@@ -2490,11 +2448,9 @@ handback  compiler/functionExpressionNames.ts
 handback  compiler/functionExpressionReturningItself.ts
 handback  compiler/functionExpressionShadowedByParams.ts
 handback  compiler/functionExpressionWithResolutionOfTypeNamedArguments01.ts
-wrong     compiler/functionExpressionWithResolutionOfTypeOfSameName01.ts
 handback  compiler/functionInIfStatementInModule.ts
 handback  compiler/functionLikeInParameterInitializer.ts
 handback  compiler/functionMergedWithModule.ts
-wrong     compiler/functionOnlyHasThrow.ts
 handback  compiler/functionOverloadAmbiguity1.ts
 handback  compiler/functionOverloadImplementationOfWrongName.ts
 handback  compiler/functionOverloadImplementationOfWrongName2.ts
@@ -2553,14 +2509,12 @@ handback  compiler/functionTypeArgumentArrayAssignment.ts
 handback  compiler/functionTypeArgumentAssignmentCompat.ts
 handback  compiler/functionTypesLackingReturnTypes.ts
 handback  compiler/functionVariableInReturnTypeAnnotation.ts
-wrong     compiler/functionWithDefaultParameterWithNoStatements10.ts
 handback  compiler/functionWithDefaultParameterWithNoStatements11.ts
 handback  compiler/functionWithDefaultParameterWithNoStatements12.ts
 handback  compiler/functionWithDefaultParameterWithNoStatements14.ts
 handback  compiler/functionWithNoBestCommonType1.ts
 handback  compiler/functionWithNoBestCommonType2.ts
 handback  compiler/functionWithSameNameAsField.ts
-wrong     compiler/functionWithThrowButNoReturn1.ts
 handback  compiler/functionsInClassExpressions.ts
 handback  compiler/functionsMissingReturnStatementsAndExpressions.ts
 handback  compiler/functionsMissingReturnStatementsAndExpressionsStrictNullChecks.ts
@@ -2587,7 +2541,6 @@ handback  compiler/genericArrayAssignment1.ts
 handback  compiler/genericArrayAssignmentCompatErrors.ts
 handback  compiler/genericArrayExtenstions.ts
 handback  compiler/genericArrayMethods1.ts
-wrong     compiler/genericArrayPropertyAssignment.ts
 handback  compiler/genericArrayWithoutTypeAnnotation.ts
 handback  compiler/genericAssignmentCompatOfFunctionSignatures1.ts
 handback  compiler/genericAssignmentCompatWithInterfaces1.ts
@@ -2806,7 +2759,6 @@ handback  compiler/implementsIncorrectlyNoAssertion.ts
 handback  compiler/implicitAnyAmbients.ts
 handback  compiler/implicitAnyAnyReturningFunction.ts
 handback  compiler/implicitAnyCastedValue.ts
-wrong     compiler/implicitAnyDeclareFunctionExprWithoutFormalType.ts
 handback  compiler/implicitAnyDeclareFunctionWithoutFormalType2.ts
 handback  compiler/implicitAnyDeclareMemberWithoutType.ts
 handback  compiler/implicitAnyDeclareMemberWithoutType2.ts
@@ -2814,7 +2766,6 @@ handback  compiler/implicitAnyDeclareTypePropertyWithoutType.ts
 handback  compiler/implicitAnyDeclareVariablesWithoutTypeAndInit.ts
 handback  compiler/implicitAnyFromCircularInference.ts
 handback  compiler/implicitAnyFunctionInvocationWithAnyArguements.ts
-wrong     compiler/implicitAnyFunctionReturnNullOrUndefined.ts
 handback  compiler/implicitAnyGenericTypeInference.ts
 handback  compiler/implicitAnyGenerics.ts
 handback  compiler/implicitAnyGetAndSetAccessorWithAnyReturnType.ts
@@ -3465,7 +3416,6 @@ handback  compiler/jsdocTypeGenericInstantiationAttempt.ts
 handback  compiler/jsdocTypeNongenericInstantiationAttempt.ts
 handback  compiler/jsdocTypedefBeforeParenthesizedExpression.ts
 handback  compiler/jsdocTypedefMissingType.ts
-wrong     compiler/jsdocTypedefNoCrash2.ts
 handback  compiler/jsdocTypedef_propertyWithNoType.ts
 handback  compiler/jsdocUnexpectedCharacter.ts
 handback  compiler/json.stringify.ts
@@ -3590,7 +3540,6 @@ handback  compiler/letAsIdentifierInStrictMode.ts
 handback  compiler/letConstInCaseClauses.ts
 handback  compiler/letConstMatchingParameterNames.ts
 handback  compiler/letDeclarations-access.ts
-handback  compiler/letDeclarations-es5.ts
 handback  compiler/letDeclarations-invalidContexts.ts
 handback  compiler/letDeclarations-scopes-duplicates.ts
 handback  compiler/letDeclarations-scopes-duplicates2.ts
@@ -3604,7 +3553,6 @@ handback  compiler/letDeclarations-scopes2.ts
 handback  compiler/letDeclarations-useBeforeDefinition.ts
 handback  compiler/letDeclarations-useBeforeDefinition2.ts
 handback  compiler/letDeclarations-validContexts.ts
-handback  compiler/letDeclarations.ts
 handback  compiler/letDeclarations2.ts
 handback  compiler/letInConstDeclarations_ES5.ts
 handback  compiler/letInConstDeclarations_ES6.ts
@@ -3612,7 +3560,6 @@ handback  compiler/letInLetConstDeclOfForOfAndForIn_ES5.ts
 handback  compiler/letInLetConstDeclOfForOfAndForIn_ES6.ts
 handback  compiler/letInLetDeclarations_ES5.ts
 handback  compiler/letInLetDeclarations_ES6.ts
-wrong     compiler/letInNonStrictMode.ts
 handback  compiler/letInVarDeclOfForIn_ES5.ts
 handback  compiler/letInVarDeclOfForIn_ES6.ts
 handback  compiler/letInVarDeclOfForOf_ES5.ts
@@ -3653,8 +3600,6 @@ handback  compiler/manyCompilerErrorsInTheTwoFiles.ts
 handback  compiler/mapConstructor.ts
 handback  compiler/mapConstructorOnReadonlyTuple.ts
 handback  compiler/mapGroupBy.ts
-wrong     compiler/mapOnTupleTypes01.ts
-wrong     compiler/mapOnTupleTypes02.ts
 handback  compiler/mapUpsert.ts
 handback  compiler/mappedArrayTupleIntersections.ts
 handback  compiler/mappedToToIndexSignatureInference.ts
@@ -3788,7 +3733,6 @@ handback  compiler/modularizeLibrary_NoErrorDuplicateLibOptions2.ts
 handback  compiler/modularizeLibrary_TargetES5UsingES6Lib.ts
 handback  compiler/modularizeLibrary_TargetES6UsingES6Lib.ts
 handback  compiler/modularizeLibrary_UsingES5LibAndES6ArrayLib.ts
-handback  compiler/modularizeLibrary_UsingES5LibAndES6FeatureLibs.ts
 handback  compiler/modularizeLibrary_UsingES5LibES6ArrayLibES6WellknownSymbolLib.ts
 handback  compiler/modularizeLibrary_Worker.asynciterable.ts
 handback  compiler/modularizeLibrary_Worker.iterable.ts
@@ -3977,7 +3921,6 @@ handback  compiler/module_augmentExistingVariable.ts
 handback  compiler/module_augmentUninstantiatedModule.ts
 handback  compiler/module_augmentUninstantiatedModule2.ts
 handback  compiler/moduledecl.ts
-wrong     compiler/multiCallOverloads.ts
 handback  compiler/multiExtendsSplitInterfaces1.ts
 handback  compiler/multiExtendsSplitInterfaces2.ts
 handback  compiler/multiImportExport.ts
@@ -4125,7 +4068,6 @@ handback  compiler/noCircularitySelfReferentialGetter1.ts
 handback  compiler/noCircularitySelfReferentialGetter2.ts
 handback  compiler/noCircularitySelfReferentialGetter3.ts
 handback  compiler/noCircularitySelfReferentialGetter4.ts
-wrong     compiler/noCollisionThisExpressionAndClassInGlobal.ts
 handback  compiler/noCollisionThisExpressionAndLocalVarInConstructor.ts
 handback  compiler/noCollisionThisExpressionAndLocalVarInFunction.ts
 handback  compiler/noCollisionThisExpressionAndLocalVarInLambda.ts
@@ -4163,7 +4105,6 @@ handback  compiler/noImplicitAnyFunctionExpressionAssignment.ts
 handback  compiler/noImplicitAnyFunctions.ts
 handback  compiler/noImplicitAnyInBareInterface.ts
 handback  compiler/noImplicitAnyInCastExpression.ts
-wrong     compiler/noImplicitAnyInContextuallyTypesFunctionParamter.ts
 handback  compiler/noImplicitAnyIndexing.ts
 handback  compiler/noImplicitAnyIndexingSuppressed.ts
 handback  compiler/noImplicitAnyLoopCrash.ts
@@ -4200,7 +4141,6 @@ handback  compiler/noObjectKeysToKeyofT.ts
 handback  compiler/noParameterReassignmentIIFEAnnotated.ts
 handback  compiler/noParameterReassignmentJSIIFE.ts
 handback  compiler/noRepeatedPropertyNames.ts
-wrong     compiler/noSelfOnVars.ts
 handback  compiler/noStrictGenericChecks.ts
 handback  compiler/noSubtypeReduction.ts
 handback  compiler/noSymbolForMergeCrash.ts
@@ -4215,7 +4155,6 @@ handback  compiler/noUnusedLocals_typeParameterMergedWithParameter.ts
 handback  compiler/noUnusedLocals_writeOnly.ts
 handback  compiler/noUnusedLocals_writeOnlyProperty.ts
 handback  compiler/noUnusedLocals_writeOnlyProperty_dynamicNames.ts
-wrong     compiler/noUsedBeforeDefinedErrorInAmbientContext1.ts
 handback  compiler/noUsedBeforeDefinedErrorInTypeContext.ts
 handback  compiler/nodeColonModuleResolution.ts
 handback  compiler/nodeColonModuleResolution2.ts
@@ -4439,7 +4378,6 @@ handback  compiler/overridingPrivateStaticMembers.ts
 handback  compiler/overshifts.ts
 handback  compiler/paramPropertiesInSignatures.ts
 handback  compiler/parameterDecoratorsEmitCrash.ts
-wrong     compiler/parameterDestructuringObjectLiteral.ts
 handback  compiler/parameterInitializerBeforeDestructuringEmit.ts
 handback  compiler/parameterListAsTupleType.ts
 handback  compiler/parameterNamesInTypeParameterList.ts
@@ -4500,7 +4438,6 @@ handback  compiler/parsingClassRecoversWhenHittingUnexpectedSemicolon.ts
 handback  compiler/parsingDeepParenthensizedExpression.ts
 handback  compiler/partialDiscriminatedUnionMemberHasGoodError.ts
 handback  compiler/partialOfLargeAPIIsAbleToBeWorkedWith.ts
-wrong     compiler/partialTypeNarrowedToByTypeGuard.ts
 handback  compiler/partiallyAmbientClodule.ts
 handback  compiler/partiallyAmbientFundule.ts
 handback  compiler/partiallyDiscriminantedUnions.ts
@@ -4567,7 +4504,6 @@ handback  compiler/privacyCheckExportAssignmentOnExportedGenericInterface1.ts
 handback  compiler/privacyCheckExportAssignmentOnExportedGenericInterface2.ts
 handback  compiler/privacyCheckExternalModuleExportAssignmentOfGenericClass.ts
 handback  compiler/privacyCheckOnTypeParameterReferenceInConstructorParameter.ts
-wrong     compiler/privacyCheckTypeOfFunction.ts
 handback  compiler/privacyCheckTypeOfInvisibleModuleError.ts
 handback  compiler/privacyCheckTypeOfInvisibleModuleNoError.ts
 handback  compiler/privacyClass.ts
@@ -4780,7 +4716,6 @@ handback  compiler/recursiveInheritanceGeneric.ts
 handback  compiler/recursiveLetConst.ts
 handback  compiler/recursiveMods.ts
 handback  compiler/recursiveNamedLambdaCall.ts
-wrong     compiler/recursiveObjectLiteral.ts
 handback  compiler/recursiveProperties.ts
 handback  compiler/recursiveResolveDeclaredMembers.ts
 handback  compiler/recursiveResolveTypeMembers.ts
@@ -4885,16 +4820,13 @@ handback  compiler/reservedWords2.ts
 handback  compiler/reservedWords3.ts
 handback  compiler/resolutionCandidateFromPackageJsonField1.ts
 handback  compiler/resolutionCandidateFromPackageJsonField2.ts
-wrong     compiler/resolveInterfaceNameWithSameLetDeclarationName1.ts
 handback  compiler/resolveInterfaceNameWithSameLetDeclarationName2.ts
 handback  compiler/resolveModuleNameWithSameLetDeclarationName1.ts
 handback  compiler/resolveModuleNameWithSameLetDeclarationName2.ts
 handback  compiler/resolveNameWithNamspace.ts
-wrong     compiler/resolveTypeAliasWithSameLetDeclarationName1.ts
 handback  compiler/resolvingClassDeclarationWhenInBaseTypeResolution.ts
 handback  compiler/restArgAssignmentCompat.ts
 handback  compiler/restArgMissingName.ts
-wrong     compiler/restElementAssignable.ts
 handback  compiler/restElementWithNumberPropertyName.ts
 handback  compiler/restIntersection.ts
 handback  compiler/restInvalidArgumentType.ts
@@ -4961,7 +4893,6 @@ handback  compiler/selfReferencesInFunctionParameters.ts
 handback  compiler/selfReferencingFile.ts
 handback  compiler/selfReferencingFile2.ts
 handback  compiler/selfReferencingFile3.ts
-wrong     compiler/selfReferencingSpreadInLoop.ts
 handback  compiler/selfReferentialDefaultNoStackOverflow.ts
 handback  compiler/selfReferentialFunctionType.ts
 handback  compiler/semicolonsInModuleDeclarations.ts
@@ -4981,8 +4912,6 @@ handback  compiler/shebangError.ts
 handback  compiler/shorthand-property-es5-es6.ts
 handback  compiler/shorthand-property-es6-amd.ts
 handback  compiler/shorthand-property-es6-es6.ts
-wrong     compiler/shorthandOfExportedEntity01_targetES2015_CommonJS.ts
-wrong     compiler/shorthandOfExportedEntity02_targetES5_CommonJS.ts
 handback  compiler/shorthandPropertyAssignmentInES6Module.ts
 handback  compiler/shorthandPropertyAssignmentsInDestructuring.ts
 handback  compiler/shorthandPropertyAssignmentsInDestructuring_ES6.ts
@@ -5003,7 +4932,6 @@ handback  compiler/signatureLengthMismatchWithOptionalParameters.ts
 handback  compiler/signatureOverloadsWithComments.ts
 handback  compiler/signaturesUseJSDocForOptionalParameters.ts
 handback  compiler/silentNeverPropagation.ts
-wrong     compiler/simpleArrowFunctionParameterReferencedInObjectLiteral1.ts
 handback  compiler/simpleRecursionWithBaseCase1.ts
 handback  compiler/simpleRecursionWithBaseCase2.ts
 handback  compiler/simpleRecursionWithBaseCase3.ts
@@ -5052,8 +4980,6 @@ handback  compiler/sourceMapValidationDestructuringVariableStatement1.ts
 handback  compiler/sourceMapValidationDestructuringVariableStatementArrayBindingPattern.ts
 handback  compiler/sourceMapValidationDestructuringVariableStatementArrayBindingPattern2.ts
 handback  compiler/sourceMapValidationDestructuringVariableStatementArrayBindingPattern3.ts
-wrong     compiler/sourceMapValidationDestructuringVariableStatementArrayBindingPattern4.ts
-wrong     compiler/sourceMapValidationDestructuringVariableStatementArrayBindingPattern5.ts
 handback  compiler/sourceMapValidationDestructuringVariableStatementArrayBindingPattern6.ts
 handback  compiler/sourceMapValidationDestructuringVariableStatementArrayBindingPattern7.ts
 handback  compiler/sourceMapValidationDestructuringVariableStatementArrayBindingPatternDefaultValues.ts
@@ -5139,7 +5065,6 @@ handback  compiler/staticInstanceResolution2.ts
 handback  compiler/staticInstanceResolution3.ts
 handback  compiler/staticInstanceResolution4.ts
 handback  compiler/staticInstanceResolution5.ts
-wrong     compiler/staticInterfaceAssignmentCompat.ts
 handback  compiler/staticMemberAccessOffDerivedType1.ts
 handback  compiler/staticMemberExportAccess.ts
 handback  compiler/staticMemberOfClassAndPublicMemberOfAnotherClassAssignment.ts
@@ -5335,11 +5260,9 @@ handback  compiler/targetTypeBaseCalls.ts
 handback  compiler/targetTypeCastTest.ts
 handback  compiler/targetTypeObjectLiteralToAny.ts
 handback  compiler/targetTypeTest1.ts
-wrong     compiler/targetTypeTest2.ts
 handback  compiler/targetTypeTest3.ts
 handback  compiler/targetTypeVoidFunc.ts
 handback  compiler/templateExpressionAsPossiblyDiscriminantValue.ts
-wrong     compiler/templateExpressionNoInlininingOfConstantBindingWithInitializer.ts
 handback  compiler/templateLiteralConstantEvaluation.ts
 handback  compiler/templateLiteralEscapeSequence.ts
 handback  compiler/templateLiteralIntersection2.ts
@@ -5500,7 +5423,6 @@ handback  compiler/typeGuardNarrowsIndexedAccessOfKnownProperty1.ts
 handback  compiler/typeGuardNarrowsIndexedAccessOfKnownProperty10.ts
 handback  compiler/typeGuardNarrowsIndexedAccessOfKnownProperty11.ts
 handback  compiler/typeGuardNarrowsIndexedAccessOfKnownProperty12.ts
-wrong     compiler/typeGuardNarrowsIndexedAccessOfKnownProperty3.ts
 handback  compiler/typeGuardNarrowsIndexedAccessOfKnownProperty5.ts
 handback  compiler/typeGuardNarrowsIndexedAccessOfKnownProperty6.ts
 handback  compiler/typeGuardNarrowsIndexedAccessOfKnownProperty7.ts
@@ -5635,17 +5557,14 @@ handback  compiler/typeofEnum.ts
 handback  compiler/typeofExternalModules.ts
 handback  compiler/typeofImportInstantiationExpression.ts
 handback  compiler/typeofInObjectLiteralType.ts
-wrong     compiler/typeofInterface.ts
 handback  compiler/typeofInternalModules.ts
 handback  compiler/typeofObjectInference.ts
 handback  compiler/typeofProperty.ts
 handback  compiler/typeofSimple.ts
-wrong     compiler/typeofStrictNull.ts
 handback  compiler/typeofStripsFreshness.ts
 handback  compiler/typeofThisInMethodSignature.ts
 handback  compiler/typeofUndefined.ts
 handback  compiler/typeofUnknownSymbol.ts
-wrong     compiler/typeofUsedBeforeBlockScoped.ts
 handback  compiler/umdDependencyComment2.ts
 handback  compiler/umdDependencyCommentName1.ts
 handback  compiler/umdDependencyCommentName2.ts
@@ -5728,10 +5647,7 @@ handback  compiler/unparenthesizedConstructorTypeInUnionOrIntersection.ts
 handback  compiler/unparenthesizedFunctionTypeInUnionOrIntersection.ts
 handback  compiler/unqualifiedCallToClassStatic1.ts
 handback  compiler/unreachableDeclarations.ts
-wrong     compiler/unreachableFlowAfterFinally.ts
 handback  compiler/unreachableJavascriptChecked.ts
-wrong     compiler/unreachableSwitchTypeofAny.ts
-wrong     compiler/unreachableSwitchTypeofUnknown.ts
 handback  compiler/unresolvableSelfReferencingAwaitedUnion.ts
 handback  compiler/unresolvedTypeAssertionSymbol.ts
 handback  compiler/unspecializedConstraints.ts
@@ -5865,7 +5781,6 @@ handback  compiler/useUnknownInCatchVariables01.ts
 handback  compiler/usedImportNotElidedInJs.ts
 handback  compiler/usingModuleWithExportImportInValuePosition.ts
 handback  compiler/validRegexp.ts
-wrong     compiler/validUseOfThisInSuper.ts
 handback  compiler/valueOfTypedArray.ts
 handback  compiler/varAndFunctionShareName.ts
 handback  compiler/varArgConstructorMemberParameter.ts
@@ -5899,9 +5814,7 @@ handback  compiler/voidArrayLit.ts
 handback  compiler/voidAsNonAmbiguousReturnType.ts
 handback  compiler/voidAsOperator.ts
 handback  compiler/voidConstructor.ts
-wrong     compiler/voidFunctionAssignmentCompat.ts
 handback  compiler/voidReturnIndexUnionInference.ts
-wrong     compiler/voidReturnLambdaValue.ts
 handback  compiler/voidUndefinedReduction.ts
 handback  compiler/vueLikeDataAndPropsInference.ts
 handback  compiler/vueLikeDataAndPropsInference2.ts
@@ -6203,18 +6116,15 @@ handback  conformance/classes/classExpressions/genericClassExpressionInFunction.
 handback  conformance/classes/classExpressions/modifierOnClassExpressionMemberInFunction.ts
 handback  conformance/classes/classStaticBlock/classStaticBlock10.ts
 handback  conformance/classes/classStaticBlock/classStaticBlock11.ts
-wrong     conformance/classes/classStaticBlock/classStaticBlock13.ts
 handback  conformance/classes/classStaticBlock/classStaticBlock15.ts
 handback  conformance/classes/classStaticBlock/classStaticBlock16.ts
 handback  conformance/classes/classStaticBlock/classStaticBlock17.ts
 handback  conformance/classes/classStaticBlock/classStaticBlock18.ts
 handback  conformance/classes/classStaticBlock/classStaticBlock19.ts
-wrong     conformance/classes/classStaticBlock/classStaticBlock2.ts
 handback  conformance/classes/classStaticBlock/classStaticBlock20.ts
 handback  conformance/classes/classStaticBlock/classStaticBlock22.ts
 handback  conformance/classes/classStaticBlock/classStaticBlock23.ts
 handback  conformance/classes/classStaticBlock/classStaticBlock24.ts
-wrong     conformance/classes/classStaticBlock/classStaticBlock25.ts
 handback  conformance/classes/classStaticBlock/classStaticBlock26.ts
 handback  conformance/classes/classStaticBlock/classStaticBlock27.ts
 handback  conformance/classes/classStaticBlock/classStaticBlock28.ts
@@ -6580,7 +6490,6 @@ handback  conformance/controlFlow/controlFlowBindingPatternOrder.ts
 handback  conformance/controlFlow/controlFlowComputedPropertyNames.ts
 handback  conformance/controlFlow/controlFlowConditionalExpression.ts
 handback  conformance/controlFlow/controlFlowDeleteOperator.ts
-wrong     conformance/controlFlow/controlFlowDestructuringDeclaration.ts
 handback  conformance/controlFlow/controlFlowDoWhileStatement.ts
 handback  conformance/controlFlow/controlFlowElementAccess.ts
 handback  conformance/controlFlow/controlFlowElementAccess2.ts
@@ -7047,7 +6956,6 @@ handback  conformance/es6/classDeclaration/emitClassDeclarationWithGetterSetterI
 handback  conformance/es6/classDeclaration/emitClassDeclarationWithLiteralPropertyNameInES6.ts
 handback  conformance/es6/classDeclaration/emitClassDeclarationWithMethodInES6.ts
 handback  conformance/es6/classDeclaration/emitClassDeclarationWithPropertyAccessInHeritageClause1.ts
-wrong     conformance/es6/classDeclaration/emitClassDeclarationWithThisKeywordInES6.ts
 handback  conformance/es6/classDeclaration/emitClassDeclarationWithTypeArgumentAndOverloadInES6.ts
 handback  conformance/es6/classDeclaration/emitClassDeclarationWithTypeArgumentInES6.ts
 handback  conformance/es6/classDeclaration/exportDefaultClassWithStaticPropertyAssignmentsInES6.ts
@@ -7291,7 +7199,6 @@ handback  conformance/es6/destructuring/emptyVariableDeclarationBindingPatterns0
 handback  conformance/es6/destructuring/emptyVariableDeclarationBindingPatterns02_ES5.ts
 handback  conformance/es6/destructuring/emptyVariableDeclarationBindingPatterns02_ES5iterable.ts
 handback  conformance/es6/destructuring/emptyVariableDeclarationBindingPatterns02_ES6.ts
-wrong     conformance/es6/destructuring/iterableArrayPattern1.ts
 handback  conformance/es6/destructuring/iterableArrayPattern10.ts
 handback  conformance/es6/destructuring/iterableArrayPattern11.ts
 handback  conformance/es6/destructuring/iterableArrayPattern12.ts
@@ -7302,7 +7209,6 @@ handback  conformance/es6/destructuring/iterableArrayPattern16.ts
 handback  conformance/es6/destructuring/iterableArrayPattern17.ts
 handback  conformance/es6/destructuring/iterableArrayPattern18.ts
 handback  conformance/es6/destructuring/iterableArrayPattern19.ts
-wrong     conformance/es6/destructuring/iterableArrayPattern2.ts
 handback  conformance/es6/destructuring/iterableArrayPattern20.ts
 handback  conformance/es6/destructuring/iterableArrayPattern21.ts
 handback  conformance/es6/destructuring/iterableArrayPattern22.ts
@@ -7358,7 +7264,6 @@ handback  conformance/es6/for-ofStatements/for-of17.ts
 handback  conformance/es6/for-ofStatements/for-of18.ts
 handback  conformance/es6/for-ofStatements/for-of2.ts
 handback  conformance/es6/for-ofStatements/for-of22.ts
-wrong     conformance/es6/for-ofStatements/for-of23.ts
 handback  conformance/es6/for-ofStatements/for-of24.ts
 handback  conformance/es6/for-ofStatements/for-of25.ts
 handback  conformance/es6/for-ofStatements/for-of26.ts
@@ -7392,7 +7297,6 @@ handback  conformance/es6/for-ofStatements/for-of58.ts
 handback  conformance/es6/for-ofStatements/for-of6.ts
 handback  conformance/es6/for-ofStatements/for-of7.ts
 handback  conformance/es6/for-ofStatements/for-of8.ts
-wrong     conformance/es6/for-ofStatements/for-of9.ts
 handback  conformance/es6/functionDeclarations/FunctionDeclaration10_es6.ts
 handback  conformance/es6/functionDeclarations/FunctionDeclaration11_es6.ts
 handback  conformance/es6/functionDeclarations/FunctionDeclaration12_es6.ts
@@ -7553,15 +7457,10 @@ handback  conformance/es6/templates/taggedTemplateWithConstructableTag01.ts
 handback  conformance/es6/templates/taggedTemplateWithConstructableTag02.ts
 handback  conformance/es6/templates/taggedTemplatesWithTypeArguments1.ts
 handback  conformance/es6/templates/taggedTemplatesWithTypeArguments2.ts
-wrong     conformance/es6/templates/templateStringBinaryOperationsES6Invalid.ts
-wrong     conformance/es6/templates/templateStringBinaryOperationsInvalid.ts
 handback  conformance/es6/templates/templateStringInCallExpression.ts
 handback  conformance/es6/templates/templateStringInCallExpressionES6.ts
-wrong     conformance/es6/templates/templateStringInConditional.ts
-wrong     conformance/es6/templates/templateStringInConditionalES6.ts
 handback  conformance/es6/templates/templateStringInDeleteExpression.ts
 handback  conformance/es6/templates/templateStringInDeleteExpressionES6.ts
-wrong     conformance/es6/templates/templateStringInDivision.ts
 handback  conformance/es6/templates/templateStringInFunctionParameterType.ts
 handback  conformance/es6/templates/templateStringInFunctionParameterTypeES6.ts
 handback  conformance/es6/templates/templateStringInIndexExpression.ts
@@ -7570,10 +7469,6 @@ handback  conformance/es6/templates/templateStringInInstanceOf.ts
 handback  conformance/es6/templates/templateStringInInstanceOfES6.ts
 handback  conformance/es6/templates/templateStringInModuleName.ts
 handback  conformance/es6/templates/templateStringInModuleNameES6.ts
-wrong     conformance/es6/templates/templateStringInModulo.ts
-wrong     conformance/es6/templates/templateStringInModuloES6.ts
-wrong     conformance/es6/templates/templateStringInMultiplication.ts
-wrong     conformance/es6/templates/templateStringInMultiplicationES6.ts
 handback  conformance/es6/templates/templateStringInNewExpression.ts
 handback  conformance/es6/templates/templateStringInNewExpressionES6.ts
 handback  conformance/es6/templates/templateStringInNewOperator.ts
@@ -7588,8 +7483,6 @@ handback  conformance/es6/templates/templateStringInSwitchAndCase.ts
 handback  conformance/es6/templates/templateStringInSwitchAndCaseES6.ts
 handback  conformance/es6/templates/templateStringInTaggedTemplate.ts
 handback  conformance/es6/templates/templateStringInTaggedTemplateES6.ts
-wrong     conformance/es6/templates/templateStringInUnaryPlus.ts
-wrong     conformance/es6/templates/templateStringInUnaryPlusES6.ts
 handback  conformance/es6/templates/templateStringInYieldKeyword.ts
 handback  conformance/es6/templates/templateStringUnterminated1.ts
 handback  conformance/es6/templates/templateStringUnterminated1_ES6.ts
@@ -7748,7 +7641,6 @@ handback  conformance/es7/exponentiationOperator/exponentiationOperatorWithNew.t
 handback  conformance/es7/exponentiationOperator/exponentiationOperatorWithNullValueAndInvalidOperands.ts
 handback  conformance/es7/exponentiationOperator/exponentiationOperatorWithNullValueAndValidOperands.ts
 handback  conformance/es7/exponentiationOperator/exponentiationOperatorWithOnlyNullValueOrUndefinedValue.ts
-wrong     conformance/es7/exponentiationOperator/exponentiationOperatorWithTemplateStringInvalid.ts
 handback  conformance/es7/exponentiationOperator/exponentiationOperatorWithTemplateStringInvalidES6.ts
 handback  conformance/es7/exponentiationOperator/exponentiationOperatorWithTypeParameter.ts
 handback  conformance/es7/exponentiationOperator/exponentiationOperatorWithUndefinedValueAndInvalidOperands.ts
@@ -7866,7 +7758,6 @@ handback  conformance/esDecorators/metadata/esDecoratorsMetadata2.ts
 handback  conformance/esDecorators/metadata/esDecoratorsMetadata3.ts
 handback  conformance/esDecorators/metadata/esDecoratorsMetadata4.ts
 handback  conformance/esDecorators/metadata/esDecoratorsMetadata5.ts
-wrong     conformance/esnext/logicalAssignment/logicalAssignment11.ts
 handback  conformance/expressions/arrayLiterals/arrayLiteralInference.ts
 handback  conformance/expressions/arrayLiterals/arrayLiterals.ts
 handback  conformance/expressions/arrayLiterals/arrayLiterals2ES5.ts
@@ -8925,7 +8816,6 @@ handback  conformance/jsdoc/moduleExportsElementAccessAssignment.ts
 handback  conformance/jsdoc/moduleExportsElementAccessAssignment2.ts
 handback  conformance/jsdoc/noAssertForUnparseableTypedefs.ts
 handback  conformance/jsdoc/noDuplicateJsdoc1.ts
-wrong     conformance/jsdoc/overloadTag1.ts
 handback  conformance/jsdoc/overloadTag2.ts
 handback  conformance/jsdoc/overloadTag3.ts
 handback  conformance/jsdoc/paramTagBracketsAddOptionalUndefined.ts
@@ -9832,7 +9722,6 @@ handback  conformance/parser/ecmascript5/Statements/parserES5ForOfStatement14.ts
 handback  conformance/parser/ecmascript5/Statements/parserES5ForOfStatement15.ts
 handback  conformance/parser/ecmascript5/Statements/parserES5ForOfStatement16.ts
 handback  conformance/parser/ecmascript5/Statements/parserES5ForOfStatement18.ts
-wrong     conformance/parser/ecmascript5/Statements/parserES5ForOfStatement19.ts
 handback  conformance/parser/ecmascript5/Statements/parserES5ForOfStatement2.ts
 handback  conformance/parser/ecmascript5/Statements/parserES5ForOfStatement20.ts
 handback  conformance/parser/ecmascript5/Statements/parserES5ForOfStatement21.ts
@@ -10015,7 +9904,6 @@ handback  conformance/parser/ecmascript6/Iterators/parserForOfStatement14.ts
 handback  conformance/parser/ecmascript6/Iterators/parserForOfStatement15.ts
 handback  conformance/parser/ecmascript6/Iterators/parserForOfStatement16.ts
 handback  conformance/parser/ecmascript6/Iterators/parserForOfStatement18.ts
-wrong     conformance/parser/ecmascript6/Iterators/parserForOfStatement19.ts
 handback  conformance/parser/ecmascript6/Iterators/parserForOfStatement2.ts
 handback  conformance/parser/ecmascript6/Iterators/parserForOfStatement20.ts
 handback  conformance/parser/ecmascript6/Iterators/parserForOfStatement21.ts
@@ -10240,7 +10128,6 @@ handback  conformance/salsa/typeFromPropertyAssignment8_1.ts
 handback  conformance/salsa/typeFromPropertyAssignment9.ts
 handback  conformance/salsa/typeFromPropertyAssignment9_1.ts
 handback  conformance/salsa/typeFromPropertyAssignmentOutOfOrder.ts
-handback  conformance/salsa/typeFromPropertyAssignmentWithExport.ts
 handback  conformance/salsa/typeFromPrototypeAssignment.ts
 handback  conformance/salsa/typeFromPrototypeAssignment2.ts
 handback  conformance/salsa/typeFromPrototypeAssignment3.ts
@@ -10370,7 +10257,6 @@ handback  conformance/statements/VariableStatements/usingDeclarations/usingDecla
 handback  conformance/statements/VariableStatements/usingDeclarations/usingDeclarationsWithObjectLiterals2.ts
 handback  conformance/statements/VariableStatements/validMultipleVariableDeclarations.ts
 handback  conformance/statements/breakStatements/doWhileBreakStatements.ts
-handback  conformance/statements/breakStatements/forInBreakStatements.ts
 handback  conformance/statements/breakStatements/invalidDoWhileBreakStatements.ts
 handback  conformance/statements/breakStatements/invalidForBreakStatements.ts
 handback  conformance/statements/breakStatements/invalidForInBreakStatements.ts
@@ -10378,7 +10264,6 @@ handback  conformance/statements/breakStatements/invalidSwitchBreakStatement.ts
 handback  conformance/statements/breakStatements/invalidWhileBreakStatements.ts
 handback  conformance/statements/breakStatements/switchBreakStatements.ts
 handback  conformance/statements/continueStatements/doWhileContinueStatements.ts
-handback  conformance/statements/continueStatements/forInContinueStatements.ts
 handback  conformance/statements/continueStatements/invalidDoWhileContinueStatements.ts
 handback  conformance/statements/continueStatements/invalidForContinueStatements.ts
 handback  conformance/statements/continueStatements/invalidForInContinueStatements.ts
@@ -10735,7 +10620,6 @@ handback  conformance/types/primitives/undefined/directReferenceToUndefined.ts
 handback  conformance/types/primitives/undefined/invalidUndefinedAssignments.ts
 handback  conformance/types/primitives/undefined/invalidUndefinedValues.ts
 handback  conformance/types/primitives/undefined/validUndefinedAssignments.ts
-wrong     conformance/types/primitives/undefined/validUndefinedValues.ts
 handback  conformance/types/primitives/void/invalidAssignmentsToVoid.ts
 handback  conformance/types/primitives/void/invalidVoidAssignments.ts
 handback  conformance/types/primitives/void/invalidVoidValues.ts
@@ -10796,7 +10680,6 @@ handback  conformance/types/spread/objectSpreadRepeatedComplexity.ts
 handback  conformance/types/spread/objectSpreadRepeatedNullCheckPerf.ts
 handback  conformance/types/spread/objectSpreadSetonlyAccessor.ts
 handback  conformance/types/spread/objectSpreadStrictNull.ts
-wrong     conformance/types/spread/spreadContextualTypedBindingPattern.ts
 handback  conformance/types/spread/spreadDuplicate.ts
 handback  conformance/types/spread/spreadDuplicateExact.ts
 handback  conformance/types/spread/spreadMethods.ts
@@ -10809,7 +10692,6 @@ handback  conformance/types/spread/spreadTypeVariable.ts
 handback  conformance/types/spread/spreadUnion.ts
 handback  conformance/types/spread/spreadUnion2.ts
 handback  conformance/types/spread/spreadUnion3.ts
-wrong     conformance/types/spread/spreadUnion4.ts
 handback  conformance/types/stringLiteral/stringLiteralCheckedInIf01.ts
 handback  conformance/types/stringLiteral/stringLiteralCheckedInIf02.ts
 handback  conformance/types/stringLiteral/stringLiteralMatchedInSwitch01.ts
@@ -10887,9 +10769,6 @@ handback  conformance/types/tuple/readonlyArraysAndTuples2.ts
 handback  conformance/types/tuple/restTupleElements1.ts
 handback  conformance/types/tuple/strictTupleLength.ts
 handback  conformance/types/tuple/tupleElementTypes1.ts
-handback  conformance/types/tuple/tupleElementTypes2.ts
-wrong     conformance/types/tuple/tupleElementTypes3.ts
-handback  conformance/types/tuple/tupleElementTypes4.ts
 handback  conformance/types/tuple/tupleLengthCheck.ts
 handback  conformance/types/tuple/typeInferenceWithTupleType.ts
 handback  conformance/types/tuple/unionsOfTupleTypes1.ts
@@ -10900,7 +10779,6 @@ handback  conformance/types/tuple/wideningTuples1.ts
 handback  conformance/types/tuple/wideningTuples2.ts
 handback  conformance/types/tuple/wideningTuples3.ts
 handback  conformance/types/tuple/wideningTuples4.ts
-wrong     conformance/types/tuple/wideningTuples5.ts
 handback  conformance/types/tuple/wideningTuples6.ts
 handback  conformance/types/tuple/wideningTuples7.ts
 handback  conformance/types/typeAliases/asiPreventsParsingAsTypeAlias01.ts
@@ -11047,8 +10925,6 @@ handback  conformance/types/typeRelationships/comparable/equalityWithEnumTypes.t
 handback  conformance/types/typeRelationships/comparable/equalityWithIntersectionTypes01.ts
 handback  conformance/types/typeRelationships/comparable/equalityWithUnionTypes01.ts
 handback  conformance/types/typeRelationships/comparable/equalityWithtNullishCoalescingAssignment.ts
-handback  conformance/types/typeRelationships/comparable/optionalProperties01.ts
-handback  conformance/types/typeRelationships/comparable/optionalProperties02.ts
 handback  conformance/types/typeRelationships/comparable/switchCaseWithIntersectionTypes01.ts
 handback  conformance/types/typeRelationships/comparable/switchCaseWithUnionTypes01.ts
 handback  conformance/types/typeRelationships/comparable/typeAssertionsWithIntersectionTypes01.ts
@@ -11217,7 +11093,6 @@ handback  conformance/types/typeRelationships/typeInference/unionTypeInference.t
 handback  conformance/types/typeRelationships/widenedTypes/arrayLiteralWidened.ts
 handback  conformance/types/typeRelationships/widenedTypes/initializersWidened.ts
 handback  conformance/types/typeRelationships/widenedTypes/strictNullChecksNoWidening.ts
-wrong     conformance/types/union/contextualTypeWithUnionTypeCallSignatures.ts
 handback  conformance/types/union/contextualTypeWithUnionTypeIndexSignatures.ts
 handback  conformance/types/union/contextualTypeWithUnionTypeMembers.ts
 handback  conformance/types/union/contextualTypeWithUnionTypeObjectLiteral.ts

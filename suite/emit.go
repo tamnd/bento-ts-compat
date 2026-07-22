@@ -76,6 +76,15 @@ func preEmitHandback(p Parsed) string {
 	if p.IsMultiFile() {
 		return "multi-file case: the ahead-of-time path compiles one entry module"
 	}
+	// A case whose one real file is named with a JavaScript extension through its
+	// `// @filename` marker is a JavaScript case: the checker reads it as JS, so the
+	// baseline carries the errors TypeScript reports only in a JS file (a type alias
+	// in a .js, an incompatible JSDoc overload). bento's ahead-of-time path compiles
+	// TypeScript, not JavaScript, so it declines a .js entry by shape here rather than
+	// lowering the .ts spelling the corpus stored and missing the JS-only rejection.
+	if ext := javaScriptEntryExt(p); ext != "" {
+		return "JavaScript case: the ahead-of-time path compiles TypeScript, not a " + ext + " entry"
+	}
 	// A declaration-only or no-emit case asks the checker for types or .d.ts
 	// output and expects no program, so there is nothing for the runtime tiers to
 	// run and lowering it as a program would be measuring the wrong thing. Route it
@@ -86,6 +95,18 @@ func preEmitHandback(p Parsed) string {
 	if p.Directives.Bool("noEmit") {
 		return "noEmit case: the case asks for checking without a program"
 	}
+	// A noUnusedLocals, noUnusedParameters, or noUnusedTypeParameters case asks the
+	// checker to flag a binding, parameter, or type parameter that is declared and
+	// never read. That unused-symbol analysis is a checker lint, not a lowering: the
+	// program is legal without the flag, so the ahead-of-time path emits running Go
+	// for it, where TypeScript rejects it. Modeling the analysis is checker work a
+	// later slice owns, so decline the case by name rather than run a program the
+	// checker refuses.
+	if p.Directives.Bool("noUnusedLocals") ||
+		p.Directives.Bool("noUnusedParameters") ||
+		p.Directives.Bool("noUnusedTypeParameters") {
+		return "noUnused* case: the unused-symbol lint is a checker feature the ahead-of-time path does not perform"
+	}
 	// An outFile or module-concatenation case describes a bundling layout the
 	// single-entry path does not model, so decline it by shape rather than let the
 	// emit step stumble over the layout.
@@ -94,6 +115,25 @@ func preEmitHandback(p Parsed) string {
 	}
 	if _, ok := p.Directives.Get("out"); ok {
 		return "out case: bundled output is not a single-entry program"
+	}
+	return ""
+}
+
+// javaScriptEntryExt returns the JavaScript extension of the case's entry file
+// when its one real file is named with a JavaScript extension by a `// @filename`
+// marker, and the empty string otherwise. Only a single-file case reaches this,
+// so the entry is that file: a marker naming it foo.js makes the whole case a
+// JavaScript unit. A case with no marker, or one naming a .ts file, is TypeScript
+// and returns the empty string.
+func javaScriptEntryExt(p Parsed) string {
+	for _, f := range p.Files {
+		if f.Name == "" || !hasCode(f.Content) {
+			continue
+		}
+		switch ext := strings.ToLower(filepath.Ext(f.Name)); ext {
+		case ".js", ".mjs", ".cjs", ".jsx":
+			return ext
+		}
 	}
 	return ""
 }
@@ -118,20 +158,79 @@ func Classify(c Case) Result {
 	if reason := preEmitHandback(parsed); reason != "" {
 		return Result{Outcome: Handback, Reason: reason}
 	}
-	return classifyEmit(c.File)
+	return classifyEmit(c.File, emitOptions(parsed.Directives))
+}
+
+// emitOptions maps a case's compiler directives to the project configuration
+// bento honors while it checks and gates the case, so the AOT path checks the
+// case under the same options TypeScript did rather than under bento's fixed
+// defaults. Only the settings that change whether a diagnostic gates are carried;
+// the rest of the tsconfig surface does not reach the emit decision.
+func emitOptions(d Directives) build.EmitOptions {
+	opts := build.EmitOptions{
+		NoImplicitAny: noImplicitAny(d),
+		ImportHelpers: d.Bool("importHelpers"),
+	}
+	if v, ok := d.Get("target"); ok {
+		opts.Target = strings.TrimSpace(v)
+	}
+	if v, ok := d.Get("allowUnreachableCode"); ok {
+		allow := strings.EqualFold(strings.TrimSpace(v), "true")
+		opts.AllowUnreachableCode = &allow
+	}
+	// A case that turns strict off while keeping noImplicitAny on is checked under
+	// exactly that pair rather than under bento's forced-strict default. Forced strict
+	// keeps strictNullChecks on, under which undefined and null stay their own types
+	// instead of widening to any, so a noImplicitAny report the case's real options
+	// would raise on a widened form is masked, the wideningTuples shape. Only this pair
+	// flips strict off, because forced strict is otherwise sound: it only ever rejects
+	// more than a case's own options would. A plain non-strict case keeps bento's
+	// strict checking for the precise types the lowerer wants.
+	if opts.NoImplicitAny && strictExplicitlyFalse(d) {
+		off := false
+		opts.Strict = &off
+	}
+	return opts
+}
+
+// strictExplicitlyFalse reports whether the case turned strict off without turning
+// strictNullChecks back on. That pair is the one where bento's forced-strict default
+// diverges from the case: strict off widens undefined and null to any, and a case
+// that re-enabled strictNullChecks would keep them narrow, so it is not the widening
+// shape and stays under the strict default.
+func strictExplicitlyFalse(d Directives) bool {
+	v, ok := d.Get("strict")
+	if !ok || !strings.EqualFold(strings.TrimSpace(v), "false") {
+		return false
+	}
+	if snc, ok := d.Get("strictNullChecks"); ok && strings.EqualFold(strings.TrimSpace(snc), "true") {
+		return false
+	}
+	return true
+}
+
+// noImplicitAny reports the case's effective noImplicitAny setting. An explicit
+// noImplicitAny directive wins; absent one, strict implies it, matching how the
+// checker derives the flag. A case that sets noImplicitAny:false while strict is
+// on, as the widening cases do, is honored as off.
+func noImplicitAny(d Directives) bool {
+	if v, ok := d.Get("noImplicitAny"); ok {
+		return strings.EqualFold(strings.TrimSpace(v), "true")
+	}
+	return d.Bool("strict")
 }
 
 // classifyEmit runs build.EmitGo for a single-entry case under a panic recover
 // and maps the three ways it can end to the three outcomes. It is split from
 // Classify so the recover covers only the front-end call and nothing in the
 // screening around it.
-func classifyEmit(file string) (r Result) {
+func classifyEmit(file string, opts build.EmitOptions) (r Result) {
 	defer func() {
 		if p := recover(); p != nil {
 			r = Result{Outcome: Wrong, Reason: fmt.Sprintf("panic lowering %s: %v", filepath.Base(file), p)}
 		}
 	}()
-	code, err := build.EmitGo(file, stamp)
+	code, err := build.EmitGoWithOptions(file, stamp, opts)
 	if err != nil {
 		return Result{Outcome: Handback, Reason: strings.TrimSpace(err.Error())}
 	}

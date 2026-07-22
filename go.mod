@@ -5,9 +5,9 @@ go 1.26.5
 // bento's ahead-of-time front-end reaches typescript-go internals through an
 // additive fork. We pin the same fork revision bento pins, so the checker that
 // accepts or rejects a case here is the exact one bento ships.
-replace github.com/microsoft/typescript-go => github.com/tamnd/typescript v0.0.0-20260716030941-7e0a8605ba83
+replace github.com/microsoft/typescript-go => github.com/tamnd/typescript v0.0.0-20260722085133-c82524011893
 
-require github.com/tamnd/bento v0.0.0-20260719100700-c6bf6a3ba98a
+require github.com/tamnd/bento v0.0.0-20260722132732-1a6ee37ed0b3
 
 require (
 	github.com/evanw/esbuild v0.28.1 // indirect

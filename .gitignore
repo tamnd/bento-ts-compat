@@ -8,3 +8,4 @@ scratch/
 # behind.
 suite/buildcheck-*/
 suite/runtime-*/
+.DS_Store

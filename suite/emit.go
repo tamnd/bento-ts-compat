@@ -86,6 +86,18 @@ func preEmitHandback(p Parsed) string {
 	if p.Directives.Bool("noEmit") {
 		return "noEmit case: the case asks for checking without a program"
 	}
+	// A noUnusedLocals, noUnusedParameters, or noUnusedTypeParameters case asks the
+	// checker to flag a binding, parameter, or type parameter that is declared and
+	// never read. That unused-symbol analysis is a checker lint, not a lowering: the
+	// program is legal without the flag, so the ahead-of-time path emits running Go
+	// for it, where TypeScript rejects it. Modeling the analysis is checker work a
+	// later slice owns, so decline the case by name rather than run a program the
+	// checker refuses.
+	if p.Directives.Bool("noUnusedLocals") ||
+		p.Directives.Bool("noUnusedParameters") ||
+		p.Directives.Bool("noUnusedTypeParameters") {
+		return "noUnused* case: the unused-symbol lint is a checker feature the ahead-of-time path does not perform"
+	}
 	// An outFile or module-concatenation case describes a bundling layout the
 	// single-entry path does not model, so decline it by shape rather than let the
 	// emit step stumble over the layout.

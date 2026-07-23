@@ -116,7 +116,67 @@ func preEmitHandback(p Parsed) string {
 	if _, ok := p.Directives.Get("out"); ok {
 		return "out case: bundled output is not a single-entry program"
 	}
+	// A case whose baseline is a compiler-option-conflict diagnostic asks tsc to
+	// reject a legal program purely for its combination of build flags, before any
+	// type-checking. That validation is a command-line concern the single-entry AOT
+	// path does not model, the same family as the noEmit and outFile shapes above,
+	// so decline it by name. The outcome matches tsc either way: tsc emits the
+	// conflict error and no program, and bento hands back and emits none. Each
+	// condition is reached only after the multi-file and outFile screens, so the
+	// members of these conflicts that carry those shapes are already declined and
+	// only the bare single-entry spelling of each conflict lands here.
+	if reason := optionConflictHandback(p.Directives); reason != "" {
+		return reason
+	}
 	return ""
+}
+
+// optionConflictHandback returns the handback reason for a case whose baseline is
+// one of tsc's compiler-option-conflict diagnostics, and the empty string for a
+// case with no such conflict. The conflicts are tsc's own option validation, not a
+// verdict on the program, so a case that trips one carries an .errors.txt baseline
+// while its source is legal TypeScript. Modeling them here keeps the accept tier
+// from lowering a legal program the case's options make tsc refuse.
+func optionConflictHandback(d Directives) string {
+	sourceMap := d.Bool("sourceMap")
+	inlineSourceMap := d.Bool("inlineSourceMap")
+	_, mapRoot := d.Get("mapRoot")
+	// TS5053: inlineSourceMap cannot be combined with sourceMap or mapRoot. Both the
+	// sourceMap and the mapRoot spellings emit inline maps into the same output, which
+	// tsc rejects rather than pick one.
+	if inlineSourceMap && (sourceMap || mapRoot) {
+		return "option-conflict case: inlineSourceMap cannot be specified with sourceMap or mapRoot (TS5053)"
+	}
+	// TS5069: emitDeclarationOnly needs declaration or composite to have a .d.ts to
+	// emit; the declaration-only screen above already took the pair with declaration,
+	// so a case reaching here set emitDeclarationOnly with neither.
+	if d.Bool("emitDeclarationOnly") && !d.Bool("declaration") && !d.Bool("composite") {
+		return "option-conflict case: emitDeclarationOnly cannot be specified without declaration or composite (TS5069)"
+	}
+	// TS6379: a composite project may not disable incremental compilation, so composite
+	// with incremental turned explicitly off is a conflict.
+	if d.Bool("composite") && directiveIsFalse(d, "incremental") {
+		return "option-conflict case: a composite project may not disable incremental compilation (TS6379)"
+	}
+	// TS5074: incremental needs a configuration file or an explicit tsBuildInfoFile to
+	// know where to write its build info. A composite project supplies that implicitly;
+	// the multi-file and outFile screens already declined the tsconfig and outFile
+	// spellings, so a bare single-entry incremental case reaching here has neither.
+	if d.Bool("incremental") && !d.Bool("composite") {
+		if _, ok := d.Get("tsBuildInfoFile"); !ok {
+			return "option-conflict case: incremental needs a configuration file or an explicit tsBuildInfoFile (TS5074)"
+		}
+	}
+	return ""
+}
+
+// directiveIsFalse reports whether the case set a boolean directive explicitly to
+// false, as distinct from leaving it unset. The option-conflict screen needs the
+// difference: a composite case that omits incremental is not a conflict, while one
+// that sets incremental:false is the TS6379 shape.
+func directiveIsFalse(d Directives, key string) bool {
+	v, ok := d.Get(key)
+	return ok && strings.EqualFold(strings.TrimSpace(v), "false")
 }
 
 // javaScriptEntryExt returns the JavaScript extension of the case's entry file

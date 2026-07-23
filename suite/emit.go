@@ -169,8 +169,9 @@ func Classify(c Case) Result {
 // the rest of the tsconfig surface does not reach the emit decision.
 func emitOptions(d Directives, hasErrors bool) build.EmitOptions {
 	opts := build.EmitOptions{
-		NoImplicitAny: noImplicitAny(d),
-		ImportHelpers: d.Bool("importHelpers"),
+		NoImplicitAny:                noImplicitAny(d),
+		ImportHelpers:                d.Bool("importHelpers"),
+		StrictPropertyInitialization: strictPropertyInitialization(d),
 	}
 	if v, ok := d.Get("target"); ok {
 		opts.Target = strings.TrimSpace(v)
@@ -228,6 +229,39 @@ func noImplicitAny(d Directives) bool {
 		return strings.EqualFold(strings.TrimSpace(v), "true")
 	}
 	return d.Bool("strict")
+}
+
+// strictPropertyInitialization reports the case's effective
+// strictPropertyInitialization setting. The corpus's baselines were generated
+// with the strict family on by default: of the 550 cases whose baseline reports
+// TS2564, 544 carry no strict directive at all and none turn strict off, so the
+// harness default is on and a case escapes the check only by opting out. The
+// effective setting therefore defaults on and follows an explicit
+// strictPropertyInitialization or strict directive, and is off whenever
+// strictNullChecks is off since the check does not run without it.
+func strictPropertyInitialization(d Directives) bool {
+	if !strictFamilyOn(d, "strictNullChecks") {
+		return false
+	}
+	return strictFamilyOn(d, "strictPropertyInitialization")
+}
+
+// strictFamilyOn reports a strict-family compiler setting under the corpus's
+// on-by-default harness: an explicit directive for the setting wins, then an
+// explicit strict directive, and absent both the setting is on. The harness runs
+// strict, so gating on this report keeps bento from accepting a program tsc
+// rejected. noImplicitAny is derived off by default instead, not because the
+// harness differs but because bento deliberately lowers an untyped form to a
+// dynamic value rather than gating on it; there is no such lowering that makes an
+// uninitialized field tsc rejected safe to run, so this one follows the harness.
+func strictFamilyOn(d Directives, key string) bool {
+	if v, ok := d.Get(key); ok {
+		return strings.EqualFold(strings.TrimSpace(v), "true")
+	}
+	if v, ok := d.Get("strict"); ok {
+		return strings.EqualFold(strings.TrimSpace(v), "true")
+	}
+	return true
 }
 
 // classifyEmit runs build.EmitGo for a single-entry case under a panic recover

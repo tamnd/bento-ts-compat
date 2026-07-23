@@ -7,7 +7,7 @@ go 1.26.5
 // accepts or rejects a case here is the exact one bento ships.
 replace github.com/microsoft/typescript-go => github.com/tamnd/typescript v0.0.0-20260722183216-adb2ba1e4627
 
-require github.com/tamnd/bento v0.0.0-20260723024255-9fae260f5834
+require github.com/tamnd/bento v0.0.0-20260723090452-cd5a31c09c73
 
 require (
 	github.com/evanw/esbuild v0.28.1 // indirect

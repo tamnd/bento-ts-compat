@@ -45,9 +45,10 @@ func F(x NumOrStrOrBool) {
 	y := NumOrStrOrBoolOfBool(false)
 	z := NumOrStrOrBoolOfBool(false)
 	if func() bool {
-		_ = func() NumOrStrOrBool {
-			y = NumOrStrOrBoolOfStr(value.FromGoString(""))
-			return y
+		_ = func() value.BStr {
+			var _bt0 value.BStr = value.FromGoString("")
+			y = NumOrStrOrBoolOfStr(_bt0)
+			return _bt0
 		}()
 		return x.tag == NumOrStrOrBoolStr
 	}() {
@@ -55,9 +56,10 @@ func F(x NumOrStrOrBool) {
 		_ = y.str
 		_ = z.bl
 	} else if func() bool {
-		_ = func() NumOrStrOrBool {
-			z = NumOrStrOrBoolOfNum(1)
-			return z
+		_ = func() float64 {
+			var _bt1 float64 = 1
+			z = NumOrStrOrBoolOfNum(_bt1)
+			return _bt1
 		}()
 		return x.tag == NumOrStrOrBoolNum
 	}() {

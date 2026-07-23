@@ -2,8 +2,15 @@
 
 package main
 
+import (
+	"github.com/tamnd/bento/pkg/value"
+)
+
 func F() {
-	_ = F
+	_ = value.NewFunc(func(__a []value.Value) value.Value {
+		(F)()
+		return value.Undefined
+	})
 }
 func main() {
 }

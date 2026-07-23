@@ -6,11 +6,8 @@ import (
 	"github.com/tamnd/bento/pkg/value"
 )
 
-type ObjEmpty struct {
-}
-
 func Then(x value.Value) {
-	var match *ObjEmpty
+	var match value.Value
 	_ = match
 }
 func main() {

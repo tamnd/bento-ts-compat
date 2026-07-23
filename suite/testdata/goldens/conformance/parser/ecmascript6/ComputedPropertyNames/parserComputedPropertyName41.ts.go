@@ -6,9 +6,6 @@ import (
 	"github.com/tamnd/bento/pkg/value"
 )
 
-type ObjEmpty struct {
-}
-
 func main() {
 	v := value.NewObject().SetKeyed(value.Bool(value.InOperator(value.Number(0), value.NewArrayValue([]value.Value{}))), value.Bool(true))
 	_ = v

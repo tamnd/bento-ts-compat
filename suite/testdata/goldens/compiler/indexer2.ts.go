@@ -5,10 +5,8 @@ package main
 type ObjHasOwnProperty struct {
 	HasOwnProperty func(float64) bool `json:"hasOwnProperty"`
 }
-type ObjEmpty struct {
-}
 
 func main() {
-	directChildrenMap := &ObjEmpty{}
+	directChildrenMap := &ObjHasOwnProperty{}
 	_ = directChildrenMap
 }

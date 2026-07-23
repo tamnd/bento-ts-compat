@@ -6,14 +6,11 @@ import (
 	"github.com/tamnd/bento/pkg/value"
 )
 
-type ObjEmpty struct {
-}
-
 func F() {
-	e := value.NewArray[*ObjEmpty]()
+	e := value.NewArray[value.Value]()
 	_ = e
 	for true {
-		e = value.ArrayFrom(append([]*ObjEmpty{}, (e).Elems()...))
+		e = value.ArrayFrom(append([]value.Value{}, (e).Elems()...))
 	}
 }
 func main() {

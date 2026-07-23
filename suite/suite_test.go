@@ -154,13 +154,14 @@ func selectCases(t *testing.T) []Case {
 // case count, sets the peak footprint.
 func classifyConcurrent(root string, cases []Case, jobs int) map[string]Result {
 	results := make(map[string]Result, len(cases))
+	cache := newClassifyCache(root)
 	var mu sync.Mutex
 	work := make(chan Case)
 	var wg sync.WaitGroup
 	for range jobs {
 		wg.Go(func() {
 			for c := range work {
-				r := classifyBuilt(root, c)
+				r := classifyBuiltCached(cache, root, c)
 				mu.Lock()
 				results[c.ID] = r
 				mu.Unlock()
@@ -184,11 +185,30 @@ var (
 	corpusResults map[string]Result
 )
 
+// requireFleetForFullRun skips a full-corpus run on a local laptop, so the heavy
+// pass only runs where it belongs. A full run drives a checker and, on a pass, a
+// go build over twelve thousand cases, minutes of memory-heavy work; the local
+// iteration loop is a -filter or -shard subset instead. The Linux test fleet
+// (server3) and CI run Linux, and the developer laptop is macOS, so a full run on
+// darwin skips with a pointer to the fleet, while a Linux run always proceeds. CI
+// therefore needs no extra configuration and the ledger, golden, and diagnostics
+// gates stay live there. Setting BENTO_TS_COMPAT_LARGE forces the full run
+// locally for the rare case a developer wants it.
+func requireFleetForFullRun(t *testing.T) {
+	t.Helper()
+	if runtime.GOOS != "darwin" || os.Getenv("BENTO_TS_COMPAT_LARGE") != "" {
+		return
+	}
+	t.Skip("a full-corpus run is heavy and runs on the Linux test fleet (server3) or CI, not a local laptop; " +
+		"run a -filter or -shard subset here, or set BENTO_TS_COMPAT_LARGE=1 to force the full run")
+}
+
 // fullCorpus classifies every case once and caches the result for the run. It
 // ignores -filter on purpose: the ledger is only coherent over the whole corpus,
 // and a full TestAccept wants the same shared pass.
 func fullCorpus(t *testing.T) map[string]Result {
 	t.Helper()
+	requireFleetForFullRun(t)
 	root := moduleRoot(t)
 	corpusOnce.Do(func() {
 		all, err := Discover(casesRoot)
@@ -613,6 +633,12 @@ func TestRuntime(t *testing.T) {
 			}
 		}
 		ids = kept
+	}
+	// An unfiltered, unsharded run is the whole heavy go-run pass, so it is a full
+	// run that belongs on the fleet. A -filter or -shard subset, the local smoke
+	// and the CI shards, runs anywhere.
+	if *filter == "" && *shard == "" {
+		requireFleetForFullRun(t)
 	}
 	ids = applyShard(t, ids)
 	if len(ids) == 0 {

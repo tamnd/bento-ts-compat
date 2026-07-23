@@ -28,6 +28,18 @@ func TestMain(m *testing.M) {
 	if dirSize(cache) > maxCache {
 		_ = os.RemoveAll(cache)
 	}
+	// The classification cache holds one verdict per case content, at most the whole
+	// corpus once for the current toolchain, since a fingerprint change prunes the
+	// prior run's directory at open. That is bounded, but a stale fingerprint left by
+	// a run that was the last on its toolchain, plus the emitted Go each pass entry
+	// carries, still accretes on disk. Cap the whole classify-cache root and drop it
+	// once it grows past the cap, the same bounded-churn contract the build cache
+	// keeps; the next run refills only the entries it actually reads.
+	classifyCacheRoot := filepath.Join(os.TempDir(), cacheRootName)
+	const maxClassifyCache = 512 << 20 // 512 MiB
+	if dirSize(classifyCacheRoot) > maxClassifyCache {
+		_ = os.RemoveAll(classifyCacheRoot)
+	}
 	os.Exit(code)
 }
 

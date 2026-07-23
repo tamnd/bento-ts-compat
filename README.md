@@ -71,6 +71,22 @@ For example, to run the accept tier over just the enum conformance cases:
 go test ./suite/ -run TestAccept -filter conformance/enums/ -v
 ```
 
+### Where the full run belongs
+
+A full-corpus run drives a checker and, on a pass, a `go build` over twelve thousand cases, minutes of memory-heavy work.
+It runs on the Linux test fleet and in CI, not on a local laptop.
+The suite enforces this: a full run on macOS, the developer machine, skips with a pointer to the fleet, while a Linux run always proceeds, so CI needs no extra configuration and the ledger, golden, and diagnostics gates stay live there.
+The local iteration loop is a `-filter` or `-shard` subset, which runs anywhere.
+Set `BENTO_TS_COMPAT_LARGE=1` to force the full run on the laptop for the rare case you want it.
+
+### The classification cache
+
+A run memoizes each case's verdict on disk under the OS temp dir, so a re-run only re-checks and re-builds the cases whose input actually changed.
+The cache is keyed on the toolchain that produced the verdicts, the test binary, the module's `go.sum`, and the Go version, so a bento re-pin or a suite change lands in a fresh cache and a stale verdict is never read; within a toolchain it is keyed on each case file's content, so editing a case re-checks exactly that case.
+A re-run of an unchanged subset is a content-hash lookup rather than a rebuild, several times faster.
+The cache is bounded: a toolchain change prunes the prior toolchain's directory, and the harness drops the whole cache once it grows past a cap, the same bounded-churn contract the dedicated `go build` cache keeps, so neither grows without end and the developer's own `GOCACHE` never sees the churn.
+The cache is advisory, any read or write error degrades to computing live, and `BENTO_TS_COMPAT_NO_CACHE=1` disables it for a clean-room run that recomputes every verdict.
+
 ## The ledger
 
 `status/ledger.txt` records every non-passing case, one `<status> <case id>` line, sorted by id.

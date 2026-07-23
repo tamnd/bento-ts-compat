@@ -158,7 +158,8 @@ func Classify(c Case) Result {
 	if reason := preEmitHandback(parsed); reason != "" {
 		return Result{Outcome: Handback, Reason: reason}
 	}
-	return classifyEmit(c.File, emitOptions(parsed.Directives))
+	hasErrors := ResolveBaseline(baselinesRoot, c.ID).HasErrors()
+	return classifyEmit(c.File, emitOptions(parsed.Directives, hasErrors))
 }
 
 // emitOptions maps a case's compiler directives to the project configuration
@@ -166,7 +167,7 @@ func Classify(c Case) Result {
 // case under the same options TypeScript did rather than under bento's fixed
 // defaults. Only the settings that change whether a diagnostic gates are carried;
 // the rest of the tsconfig surface does not reach the emit decision.
-func emitOptions(d Directives) build.EmitOptions {
+func emitOptions(d Directives, hasErrors bool) build.EmitOptions {
 	opts := build.EmitOptions{
 		NoImplicitAny: noImplicitAny(d),
 		ImportHelpers: d.Bool("importHelpers"),
@@ -186,7 +187,16 @@ func emitOptions(d Directives) build.EmitOptions {
 	// flips strict off, because forced strict is otherwise sound: it only ever rejects
 	// more than a case's own options would. A plain non-strict case keeps bento's
 	// strict checking for the precise types the lowerer wants.
-	if opts.NoImplicitAny && strictExplicitlyFalse(d) {
+	//
+	// The flip is limited to error cases. Its only purpose is to let bento surface the
+	// noImplicitAny diagnostic the widened form raises, so the checker refuses a program
+	// tsc rejects; that only matters where the case has an .errors.txt baseline. An
+	// accept case with the same directives (wideningTuples2, which tsc accepts) has no
+	// diagnostic to honor, and flipping strict off there only trades bento's precise
+	// strict types, which lower to compilable Go, for widened any types that lower to
+	// mismatched tuple structs. Keeping forced strict on the accept case preserves its
+	// pass; forced strict never accepts a program the case's own looser options reject.
+	if opts.NoImplicitAny && hasErrors && strictExplicitlyFalse(d) {
 		off := false
 		opts.Strict = &off
 	}

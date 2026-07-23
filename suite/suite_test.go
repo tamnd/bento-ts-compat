@@ -58,6 +58,14 @@ var updateGoldens = flag.Bool("update-goldens", false, "rewrite goldens/ from th
 // and never needs Node itself.
 var updateOracles = flag.Bool("update-oracles", false, "regenerate oracles/ from the .js baselines on Node")
 
+// pruneOracles, set by `go test -run TestPruneOracles -prune-oracles`, removes the
+// oracles whose case no longer passes the accept tier, the orphans a coverage
+// change leaves behind. It is the Node-free half of -update-oracles: regenerating
+// survivors needs Node to run the baselines, but dropping an orphan is only a
+// deletion, so a coverage shrink can refreeze the oracle set without Node while
+// leaving every surviving oracle's frozen output byte-for-byte untouched.
+var pruneOracles = flag.Bool("prune-oracles", false, "remove oracles/ entries whose case no longer passes the accept tier, no Node needed")
+
 // updateRuntime, set by `go test -run TestRuntime -update-runtime`, rewrites the
 // runtime-wrong ratchet status/runtime.txt from the current runtime comparison
 // instead of checking against the committed one. It is the one supported way to
@@ -515,6 +523,32 @@ func TestGenOracle(t *testing.T) {
 	}
 	pruneOrphanOracles(t, candidates)
 	t.Logf("oracles: froze %d, skipped %d of %d accepted cases with a baseline", wrote, skipped, len(candidates))
+}
+
+// TestPruneOracles drops the oracles a coverage change orphaned, without Node. It
+// classifies the whole corpus, takes the oracle candidates that survive, and
+// removes every oracle whose case is no longer among them. Regenerating a
+// survivor's frozen output needs Node and stays behind -update-oracles, but an
+// orphan only needs deleting, so when the accepted set shrinks, as it did when
+// bento learned to honor a case's target and library, this refreezes the oracle
+// tree to the runnable set while leaving every surviving oracle untouched. Without
+// the flag it is a no-op, so an ordinary run never mutates the tree.
+func TestPruneOracles(t *testing.T) {
+	if !*pruneOracles {
+		t.Skip("oracle pruning runs only under -prune-oracles")
+	}
+	results := fullCorpus(t)
+	candidates := oracleCandidates(results)
+	before, err := existingOracles()
+	if err != nil {
+		t.Fatalf("scan oracles: %v", err)
+	}
+	pruneOrphanOracles(t, candidates)
+	after, err := existingOracles()
+	if err != nil {
+		t.Fatalf("scan oracles: %v", err)
+	}
+	t.Logf("oracle prune: %d oracles, %d candidates, pruned %d orphans", len(before), len(candidates), len(before)-len(after))
 }
 
 // pruneOrphanOracles removes an oracle whose case is no longer an accepted

@@ -7,10 +7,8 @@ import (
 )
 
 type ObjN_1U2D_1 struct {
-	U2D_1 *ObjEmpty `json:"-1"`
-	N_1   *ObjEmpty `json:"1"`
-}
-type ObjEmpty struct {
+	U2D_1 value.Value `json:"-1"`
+	N_1   value.Value `json:"1"`
 }
 
 func main() {

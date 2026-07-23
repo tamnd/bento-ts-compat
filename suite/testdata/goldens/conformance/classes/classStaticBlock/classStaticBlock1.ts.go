@@ -9,8 +9,10 @@ func NewC() *C {
 	return &C{}
 }
 func staticInitC() {
-	a := 1.0
-	_ = a
+	{
+		a := 1.0
+		_ = a
+	}
 }
 func main() {
 	a := 2.0

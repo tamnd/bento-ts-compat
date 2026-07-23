@@ -7,6 +7,6 @@ type ObjId struct {
 }
 
 func main() {
-	foo := (&ObjId{Id: 4})
+	foo := &ObjId{Id: 4}
 	_ = foo
 }

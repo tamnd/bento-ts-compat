@@ -6,13 +6,11 @@ import (
 	"github.com/tamnd/bento/pkg/value"
 )
 
-type ObjEmpty struct {
-}
 type ObjP struct {
 	P value.Value `json:"p"`
 }
 
 func main() {
-	x := &ObjP{P: value.Null}
+	x := value.NewObject().Set(value.FromGoString("p"), value.Null)
 	_ = x
 }

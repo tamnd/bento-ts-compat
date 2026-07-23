@@ -7,6 +7,7 @@ type ObjI struct {
 }
 
 func main() {
-	I := &ObjI{I: 3}
+	var I *ObjI
+	I = &ObjI{I: 3}
 	I.I = 4
 }

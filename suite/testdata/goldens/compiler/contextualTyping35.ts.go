@@ -2,19 +2,11 @@
 
 package main
 
-import (
-	"github.com/tamnd/bento/pkg/value"
-)
-
 type ObjId struct {
 	Id float64 `json:"id"`
 }
-type ObjIdName struct {
-	Id   float64    `json:"id"`
-	Name value.BStr `json:"name"`
-}
 
 func main() {
-	foo := &ObjIdName{Id: 4, Name: value.FromGoString("as")}
+	foo := &ObjId{Id: 4}
 	_ = foo
 }

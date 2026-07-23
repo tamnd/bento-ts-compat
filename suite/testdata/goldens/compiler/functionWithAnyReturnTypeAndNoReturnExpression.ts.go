@@ -10,7 +10,10 @@ func F() value.Value {
 	return value.Undefined
 }
 func main() {
-	f2 := func() {
+	f2 := func() value.Value {
+		func() {
+		}()
+		return value.Undefined
 	}
 	_ = f2
 	f3 := func() value.Value {

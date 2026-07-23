@@ -15,7 +15,9 @@ func NewC() *C {
 	return &C{}
 }
 func staticInitC() {
-	_ = c_p_x
+	{
+		_ = c_p_x
+	}
 }
 func main() {
 	staticInitC()

@@ -17,6 +17,18 @@ func NewC() *C {
 	return &C{}
 }
 func staticInitC() {
+	{
+	}
+	{
+	}
+	{
+	}
+	{
+	}
+	{
+	}
+	{
+	}
 }
 func main() {
 	staticInitC()

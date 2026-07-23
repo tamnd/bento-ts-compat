@@ -6,9 +6,6 @@ import (
 	"github.com/tamnd/bento/pkg/value"
 )
 
-type ObjEmpty struct {
-}
-
 func G() *value.Gen[float64] {
 	return value.NewGen[float64](func(_bt0 *value.GenCo[float64]) value.Value {
 		x := value.NewObject().SetKeyed(_bt0.Yield(0), value.NewFunc(func(__a []value.Value) value.Value {

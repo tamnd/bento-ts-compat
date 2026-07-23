@@ -6,9 +6,6 @@ import (
 	"github.com/tamnd/bento/pkg/value"
 )
 
-type ObjEmpty struct {
-}
-
 func main() {
 	o := value.NewObject().SetKeyed(value.StringValue(value.Concat(value.FromGoString(""), value.FromGoString("foo"))), value.StringValue(value.FromGoString(""))).SetKeyed(value.StringValue(value.Concat(value.FromGoString(""), value.FromGoString("bar"))), value.Number(0))
 	_ = o

@@ -6,9 +6,6 @@ import (
 	"github.com/tamnd/bento/pkg/value"
 )
 
-type ObjEmpty struct {
-}
-
 func main() {
-	_ = value.NewArray[*ObjEmpty](&ObjEmpty{})
+	_ = value.NewArray[value.Value](value.NewObject())
 }

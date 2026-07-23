@@ -2,10 +2,11 @@
 
 package main
 
-type ObjEmpty struct {
-}
+import (
+	"github.com/tamnd/bento/pkg/value"
+)
 
 func main() {
-	var v *ObjEmpty
+	var v value.Value
 	_ = v
 }

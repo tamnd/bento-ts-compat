@@ -6,9 +6,6 @@ import (
 	"github.com/tamnd/bento/pkg/value"
 )
 
-type ObjEmpty struct {
-}
-
 func main() {
 	v := func(a value.Value) value.Value {
 		return value.NewObject()

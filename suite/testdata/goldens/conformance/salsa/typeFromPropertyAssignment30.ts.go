@@ -8,9 +8,7 @@ import (
 
 type Combo struct {
 	Call func() float64
-	P    value.Opt[*ObjEmpty] `json:"p"`
-}
-type ObjEmpty struct {
+	P    value.Value `json:"p"`
 }
 
 func main() {
@@ -18,5 +16,5 @@ func main() {
 	c.Call = func() float64 {
 		return 1
 	}
-	c.P = value.Some[*ObjEmpty](&ObjEmpty{})
+	c.P = value.NewObject()
 }
